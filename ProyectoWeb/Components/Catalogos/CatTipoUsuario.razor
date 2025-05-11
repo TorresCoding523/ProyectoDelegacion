@@ -1,0 +1,109 @@
+﻿@page "/catalogos/TipoUsuario"
+
+<h3>Catálogo de Tipo Usuario</h3>
+
+<br />
+<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new TipoUsuario()))" />
+<br />
+<br />
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@tipoUsuarios" TItem="TipoUsuario">
+    <Columns>
+        <RadzenDataGridColumn Property="IdTipoUsuario" Title="ID" Width="50" />
+        <RadzenDataGridColumn Property="Nombre" Title="Nombre" Width="50" />
+        <RadzenDataGridColumn Property="Notas" Title="Notas" Width="50" />
+        <RadzenDataGridColumn Title="Acciones">
+            <Template Context="data">
+                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
+                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    TipoUsuarioManager tipoUsuarioManager;
+    List<TipoUsuario> tipoUsuarios;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        tipoUsuarioManager = FabricManager.TipoUsuarioManager;
+        ActualizarTabla();
+    }
+
+    void ActualizarTabla()
+    {
+        tipoUsuarios = tipoUsuarioManager.ObtenerTodos().Result ?? new List<TipoUsuario>();
+        InvokeAsync(StateHasChanged);
+    }
+
+    async Task Editar(TipoUsuario tipoUsuario)
+    {
+        string titulo = tipoUsuario.IdTipoUsuario == 0 ? "Nuevo Tipo Usuario" : $"Editar {tipoUsuario.Nombre}";
+        var result = await dialogService.OpenAsync(titulo, ds =>
+
+    @<RadzenStack Gap="1.5rem">
+        <div class="row">
+            <div class="col-4">Nombre</div>
+            <div class="col-8"><RadzenTextBox @bind-Value="tipoUsuario.Nombre" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Notas</div>
+            <div class="col-8"><RadzenTextArea @bind-Value="tipoUsuario.Notas" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="col-3"><RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(tipoUsuario))" /></div>
+            <div class="col-3"><RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" /></div>
+        </div>
+    </RadzenStack>
+
+    , new DialogOptions()
+    {
+        Draggable = true,
+        ShowClose = true,
+        Resizable = true,
+        Width = "600px",
+        Height = "300px"
+    });
+    }
+
+    async Task Guardar(TipoUsuario tipoUsuario)
+    {
+        TipoUsuario resultado;
+        if (tipoUsuario.IdTipoUsuario == 0)
+        {
+            resultado = await tipoUsuarioManager.Agregar(tipoUsuario);
+        }
+        else
+        {
+            resultado = await tipoUsuarioManager.Modificar(tipoUsuario);
+        }
+
+        if (resultado != null)
+        {
+            dialogService.Close(true);
+            ActualizarTabla();
+        }
+        else
+        {
+            await dialogService.Alert(tipoUsuarioManager.Error, "Error al guardar");
+        }
+    }
+
+    async Task Eliminar(TipoUsuario tipoUsuario)
+    {
+        var r = await dialogService.Confirm($"¿Realmente deseas eliminar al Tipo Usuario '{tipoUsuario.Nombre}'?", "Advertencia",
+            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+
+        if (r.Value)
+        {
+            var eliminado = await tipoUsuarioManager.Eliminar(tipoUsuario.IdTipoUsuario.ToString());
+            if (eliminado)
+            {
+                ActualizarTabla();
+            }
+        }
+    }
+}

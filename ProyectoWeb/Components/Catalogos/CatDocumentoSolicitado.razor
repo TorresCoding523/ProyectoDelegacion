@@ -1,0 +1,157 @@
+﻿@page "/catalogos/DocumentoSolicitado"
+
+<h3>CatDocumentoSolicitado</h3>
+
+<br />
+<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new DocumentoSolicitado()))" />
+<br />
+<br />
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@documentoSolicitados" TItem="DocumentoSolicitado">
+    <Columns>
+        <RadzenDataGridColumn Property="FechaSolicitud" Title="URLPlantilla" Width="50" />
+        <RadzenDataGridColumn Property="FechaEntrega" Title="Notas" Width="50" />
+        <RadzenDataGridColumn Property="FechaPago" Title="Notas" Width="50" />
+        <RadzenDataGridColumn Property="MontoPagado" Title="Notas" Width="50" />
+        <RadzenDataGridColumn Property="Finalidad" Title="Notas" Width="50" />
+        <RadzenDataGridColumn Property="Notas" Title="Notas"  Width="50"   />
+        <RadzenDataGridColumn Title="Acciones">
+            <Template Context="data">
+                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
+                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    DocumentoSolicitadoManager documentoSolicitadoManager;
+    List<DocumentoSolicitado> documentoSolicitados;
+    
+    DocumentoManager documentoManager;
+    List<Documento> documentos;
+    
+    CiudadanoManager ciudadanoManager;
+    List<Ciudadano> ciudadanos;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        documentoSolicitadoManager = FabricManager.DocumentoSolicitadoManager;
+        documentoManager = FabricManager.DocumentoManager;
+        ciudadanoManager = FabricManager.CiudadanoManager;
+
+        documentos = documentoManager.ObtenerTodos().Result;
+        ciudadanos = ciudadanoManager.ObtenerTodos().Result;
+
+        ActualizarTabla();
+    }
+
+    void ActualizarTabla()
+    {
+        documentoSolicitados = documentoSolicitadoManager.ObtenerTodos().Result ?? new List<DocumentoSolicitado>();
+        InvokeAsync(StateHasChanged);
+    }
+
+    async Task Editar(DocumentoSolicitado documentoSolicitado)
+    {
+        string titulo = documentoSolicitado.IdDocumentoSolicitado == 0 ? "Nuevo Ciudadano" : $"Editar {documentoSolicitado.IdDocumentoSolicitado}";
+        var result = await dialogService.OpenAsync(titulo, ds =>
+
+    @<RadzenStack Gap="1.5rem">
+        <div class="row">
+            <div class="col-6">Documento</div>
+            <div class="col-6">Ciudadano Solicitante</div>
+        </div>
+        <div class="row">
+            <div class="col-6"><RadzenDropDown @bind-Value="documentoSolicitado.IdDocumento" Data="documentos" TValue="int" ValueProperty="IdDocumento" TextProperty="Nombre" /></div>
+            <div class="col-6"><RadzenDropDown @bind-Value="documentoSolicitado.IdCiudadanoSolicitante" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" /></div>
+        </div>
+        <div class="row">
+            <div class="col-6">Fecha Solicitud</div>
+            <div class="col-3">Fecha Entrega</div>
+            <div class="col-3">Usuario Generador</div>
+        </div>
+        <div class="row">
+            <div class="col-6"><RadzenDatePicker @bind-Value="documentoSolicitado.FechaSolicitud" class="w-100" /></div>
+            <div class="col-3"><RadzenDatePicker @bind-Value="documentoSolicitado.FechaEntrega" class="w-100" /></div>
+            <div class="col-3"><RadzenDropDown @bind-Value="documentoSolicitado.IdUsuarioGenerador" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Fecha Pago</div>
+            <div class="col-4">Monto Pagado</div>
+            <div class="col-4">Usuario Que Entrega</div>
+        </div>
+        <div class="row">
+            <div class="col-4"><RadzenDatePicker @bind-Value="documentoSolicitado.FechaPago" class="w-100" /></div>
+            <div class="col-4"><RadzenDropDown @bind-Value="documentoSolicitado.MontoPagado" Data="documentos" TValue="decimal" ValueProperty="Costo" TextProperty="Costo" /></div>
+            <div class="col-4"><RadzenDropDown @bind-Value="documentoSolicitado.IdUsuarioQueEntrega" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" /></div>
+        </div>
+        <div class="row">
+            <div class="col-6">Finalidad</div>
+            <div class="col-6">Notas</div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <RadzenTextBox @bind-Value="documentoSolicitado.Finalidad" class="w-100" />
+            </div>
+            <div class="col-6">
+                <RadzenTextArea @bind-Value="documentoSolicitado.Notas" class="w-100" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="col-3"><RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(documentoSolicitado))" /></div>
+            <div class="col-3"><RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" /></div>
+        </div>
+    </RadzenStack>
+
+    , new DialogOptions()
+    {
+        Draggable = true,
+        ShowClose = true,
+        Resizable = true,
+        Width = "600px",
+        Height = "300px"
+    });
+    }
+
+    async Task Guardar(DocumentoSolicitado documentoSolicitado)
+    {
+        DocumentoSolicitado resultado;
+        if (documentoSolicitado.IdDocumento == 0)
+        {
+            resultado = await documentoSolicitadoManager.Agregar(documentoSolicitado);
+        }
+        else
+        {
+            resultado = await documentoSolicitadoManager.Modificar(documentoSolicitado);
+        }
+
+        if (resultado != null)
+        {
+            dialogService.Close(true);
+            ActualizarTabla();
+        }
+        else
+        {
+            await dialogService.Alert(documentoSolicitadoManager.Error, "Error al guardar");
+        }
+    }
+
+    async Task Eliminar(DocumentoSolicitado documentoSolicitado)
+    {
+        var r = await dialogService.Confirm($"¿Realmente deseas eliminar el documento solicitado '{documentoSolicitado.IdDocumentoSolicitado}'?", "Advertencia",
+            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+
+        if (r.Value)
+        {
+            var eliminado = await documentoManager.Eliminar(documentoSolicitado.IdDocumentoSolicitado.ToString());
+            if (eliminado)
+            {
+                ActualizarTabla();
+            }
+        }
+    }
+}

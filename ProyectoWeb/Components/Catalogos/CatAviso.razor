@@ -1,0 +1,124 @@
+﻿@page "/catalogos/Aviso"
+
+<h3>Aviso</h3>
+
+<br />
+<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new Aviso()))" />
+<br />
+<br />
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+Data="@avisos" TItem="Aviso">
+    <Columns>
+        <RadzenDataGridColumn Property="IdAviso" Title="ID" Width="50" />
+        <RadzenDataGridColumn Property="Titulo" Title="Titulo" Width="50" />
+        <RadzenDataGridColumn Property="Texto" Title="Texto" Width="50" />
+        <RadzenDataGridColumn Property="Fecha" Title="Fecha" Width="50" />
+        <RadzenDataGridColumn Property="IdCuidadanoResponsable" Title="CuidadanoResponsable" Width="50" />
+        <RadzenDataGridColumn Title="Acciones">
+            <Template Context="data">
+                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
+                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    AvisoManager avisoManager;
+    List<Aviso> avisos;
+
+    CiudadanoManager ciudadanoManager;
+    List<Ciudadano> ciudadanos;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        avisoManager = FabricManager.AvisoManager;
+        ciudadanoManager = FabricManager.CiudadanoManager;
+        ciudadanos = ciudadanoManager.ObtenerTodos().Result;
+        ActualizarTabla();
+    }
+
+    void ActualizarTabla()
+    {
+        avisos = avisoManager.ObtenerTodos().Result ?? new List<Aviso>();
+        InvokeAsync(StateHasChanged);
+    }
+
+    async Task Editar(Aviso aviso)
+    {
+        string titulo = aviso.IdAviso == 0 ? "Nuevo Aviso" : $"Editar {aviso.Titulo}";
+        var result = await dialogService.OpenAsync(titulo, ds =>
+
+    @<RadzenStack Gap="1.5rem">
+        <div class="row">
+            <div class="col-4">Titulo</div>
+            <div class="col-8"><RadzenTextBox @bind-Value="aviso.Titulo" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Texto</div>
+            <div class="col-8"><RadzenTextArea @bind-Value="aviso.Texto" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Fecha</div>
+            <div class="col-8"><RadzenDatePicker @bind-Value="aviso.Fecha" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Cuidadano Responsable</div>
+            <div class="col-8"><RadzenTextBox @bind-Value="aviso.IdCuidadanoResponsable" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="col-3"><RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(aviso))" /></div>
+            <div class="col-3"><RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" /></div>
+        </div>
+    </RadzenStack>
+
+    , new DialogOptions()
+    {
+        Draggable = true,
+        ShowClose = true,
+        Resizable = true,
+        Width = "600px",
+        Height = "300px"
+    });
+    }
+
+    async Task Guardar(Aviso aviso)
+    {
+        Aviso resultado;
+        if (aviso.IdAviso == 0)
+        {
+            resultado = await avisoManager.Agregar(aviso);
+        }
+        else
+        {
+            resultado = await avisoManager.Modificar(aviso);
+        }
+
+        if (resultado != null)
+        {
+            dialogService.Close(true);
+            ActualizarTabla();
+        }
+        else
+        {
+            await dialogService.Alert(avisoManager.Error, "Error al guardar");
+        }
+    }
+
+    async Task Eliminar(Aviso aviso)
+    {
+        var r = await dialogService.Confirm($"¿Realmente deseas eliminar el aviso '{aviso.Titulo}'?", "Advertencia",
+            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+
+        if (r.Value)
+        {
+            var eliminado = await avisoManager.Eliminar(aviso.IdAviso.ToString());
+            if (eliminado)
+            {
+                ActualizarTabla();
+            }
+        }
+    }
+}

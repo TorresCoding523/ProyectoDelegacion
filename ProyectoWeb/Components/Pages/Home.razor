@@ -1,0 +1,53 @@
+﻿@page "/"
+@* @layout LoginLayout *@
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+<p>Total de ciudadano @total </p>
+
+Welcome to your new app.
+
+<RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
+    <RadzenTextBox @bind-Value="userName" Name="user" Placeholder="Usuario" Style="width:100%" />
+    <RadzenPassword @bind-Value="password" Name="password" Placeholder="Contraseña" Style="width:100%" class="rz-mt-2" />
+
+    <RadzenButton Text="Iniciar sesión" Click="@Onlogin" Style="width:100%" class="rz-mt-3" />
+</RadzenCard>
+
+@code{
+    CiudadanoManager CiudadanoManger;
+    int total;
+
+    string userName;
+    string password;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        CiudadanoManger = FabricManager.CiudadanoManager;
+        // var ciudadanos = CiudadanoManger.ObtenerTodos().Result;
+        // total = ciudadanos.Count;
+    }
+
+    async void Onlogin()
+    {
+
+        Ciudadano ciudadano=CiudadanoManger.Login(
+            new LoginModel() { User = userName, Password = password }).Result;
+        if(ciudadano != null)
+        {
+            COMMON.Params.UsuarioConectado = ciudadano.Nombre;
+            navigationManager.NavigateTo("/InicioUsuario");
+        }
+        else
+        {
+            dialogService.Alert("Nombre de Usuario y/o contraseña incorrecta",
+            "Erro", new AlertOptions() { CloseDialogOnEsc = true });
+        }
+    }
+
+    void ButtonClicked(){
+        navigationManager.NavigateTo("/InicioUsuario");
+    }
+}

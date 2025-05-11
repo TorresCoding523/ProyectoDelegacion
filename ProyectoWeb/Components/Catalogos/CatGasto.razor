@@ -1,0 +1,141 @@
+﻿@page "/catalogos/Gasto"
+
+<h3>Gasto</h3>
+
+<br />
+<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new Gasto()))" />
+<br />
+<br />
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@gastos" TItem="Gasto">
+    <Columns>
+        <RadzenDataGridColumn Property="IdGasto" Title="ID" Width="50" />
+        <RadzenDataGridColumn Property="FechaGasto" Title="Fecha Gasto" Width="50" />
+        <RadzenDataGridColumn Property="Descripcion" Title="Descripcion" Width="50" />
+        <RadzenDataGridColumn Property="Monto" Title="Monto" Width="50" />
+        <RadzenDataGridColumn Property="IdUsuarioAutorizado" Title="Usuario Autorizado" Width="50" />
+        <RadzenDataGridColumn Title="Acciones">
+            <Template Context="data">
+                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
+                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    GastoManager gastoManager;
+    List<Gasto> gastos;
+
+    CiudadanoManager ciudadanoManager;
+    List<Ciudadano> ciudadanos;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        gastoManager = FabricManager.GastoManager;
+        ciudadanoManager = FabricManager.CiudadanoManager;
+
+        ciudadanos = ciudadanoManager.ObtenerTodos().Result;
+
+        ActualizarTabla();
+    }
+
+    void ActualizarTabla()
+    {
+        gastos = gastoManager.ObtenerTodos().Result ?? new List<Gasto>();
+        InvokeAsync(StateHasChanged);
+    }
+
+    async Task Editar(Gasto gasto)
+    {
+        string titulo = gasto.IdGasto == 0 ? "Nuevo Gasto" : $"Editar {gasto.IdGasto}";
+        var result = await dialogService.OpenAsync(titulo, ds =>
+
+    @<RadzenStack Gap="2.5rem">
+        <div class="row">
+            <div class="col-6">FechaGasto</div>
+            <div class="col-6">Descripcion</div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <RadzenDatePicker @bind-Value="gasto.FechaGasto" class="w-100" />
+            </div>
+            <div class="col-6">
+                <RadzenTextArea @bind-Value="gasto.Descripcion" class="w-100" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6">Monto</div>
+            <div class="col-6">IdUsuarioAutorizado</div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <RadzenNumeric @bind-Value="gasto.Monto" class="w-100" />
+            </div>
+            <div class="col-6">
+                <RadzenDropDown @bind-Value="gasto.IdUsuarioAutorizado" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="col-3">
+                <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(gasto))" />
+            </div>
+            <div class="col-3">
+                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" />
+            </div>
+        </div>
+    </RadzenStack>
+
+
+    , new DialogOptions()
+    {
+        Draggable = true,
+        ShowClose = true,
+        Resizable = true,
+        Width = "600px",
+        Height = "300px"
+    });
+    }
+
+    async Task Guardar(Gasto gasto)
+    {
+        Gasto resultado;
+        if (gasto.IdGasto == 0)
+        {
+            resultado = await gastoManager.Agregar(gasto);
+        }
+        else
+        {
+            resultado = await gastoManager.Modificar(gasto);
+        }
+
+        if (resultado != null)
+        {
+            dialogService.Close(true);
+            ActualizarTabla();
+        }
+        else
+        {
+            await dialogService.Alert(gastoManager.Error, "Error al guardar");
+        }
+    }
+
+    async Task Eliminar(Gasto gasto)
+    {
+        var r = await dialogService.Confirm($"¿Realmente deseas eliminar el gasto '{gasto.IdGasto}'?", "Advertencia",
+            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+
+        if (r.Value)
+        {
+            var eliminado = await gastoManager.Eliminar(gasto.IdGasto.ToString());
+            if (eliminado)
+            {
+                ActualizarTabla();
+            }
+        }
+    }
+}

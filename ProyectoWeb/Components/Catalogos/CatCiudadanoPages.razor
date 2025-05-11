@@ -1,0 +1,193 @@
+﻿@page "/catalogos/ciudadano1"
+
+<h3>Catalogo de Ciudadanos</h3>
+
+<br />
+<!-- Botón para agregar un nuevo ciudadano, llama a la función Editar pasando un nuevo objeto -->
+<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new Ciudadano()))" />
+<br />
+<br />
+
+<!-- Tabla con funcionalidades de ordenamiento, filtrado y paginación para mostrar la lista de ciudadanos -->
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false"
+                FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true"
+                PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@ciudadanos" LogicalFilterOperator="LogicalFilterOperator.Or">
+    <Columns>
+        <!-- Columnas que muestran cada propiedad del ciudadano -->
+        <RadzenDataGridColumn Property="IdCiudadano" Title="ID" Width="50" />
+        <RadzenDataGridColumn Property="Nombre" Title="Nombre" Width="50" />
+        <RadzenDataGridColumn Property="Apellidos" Title="Apellidos" Width="50" />
+        <RadzenDataGridColumn Property="Email" Title="Correo" Width="50" />
+        <RadzenDataGridColumn Property="TelefonoCasa" Title="Telefono" Width="50" />
+
+        <!-- Columna para botones de acción: editar y eliminar -->
+        <RadzenDataGridColumn Title="Acciones">
+            <Template Context="data">
+                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
+                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    // Declaración de variables y servicios utilizados
+    CiudadanoManager ciudadanoManager;
+    TipoUsuarioManager tipoUsuarioManager;
+    SeccionManager seccionManager;
+    List<Ciudadano> ciudadanos;
+    List<TipoUsuario> tipoUsuarios;
+    Ciudadano item;
+    Dictionary<string, string> sexos;
+    List<Seccion> secciones;
+
+    // Método que se ejecuta al inicializar el componente
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // Se inicializan los managers desde un "fabric manager"
+        ciudadanoManager = FabricManager.CiudadanoManager;
+        seccionManager = FabricManager.SeccionManager;
+        tipoUsuarioManager = FabricManager.TipoUsuarioManager;
+
+        // Se obtienen listas de datos necesarias
+        tipoUsuarios = tipoUsuarioManager.ObtenerTodos().Result;
+        secciones = seccionManager.ObtenerTodos().Result;
+
+        // Diccionario para el dropdown de sexo
+        sexos = new Dictionary<string, string>();
+        sexos.Add("M", "Masculino");
+        sexos.Add("F", "Femenino");
+
+        // Se actualiza la tabla con los datos actuales
+        ActualizarTabla();
+    }
+
+    // Método que carga los ciudadanos en la lista
+    protected void ActualizarTabla()
+    {
+        ciudadanos = ciudadanoManager.ObtenerTodos().Result ?? new List<Ciudadano>();
+        InvokeAsync(StateHasChanged);  // Refresca la interfaz
+    }
+
+    // Método para abrir el formulario de edición (o creación)
+    protected async Task Editar(Ciudadano ciudadano)
+    {
+        string titulo = string.IsNullOrEmpty(ciudadano.IdCiudadano) ? "Nuevo Ciudadano" : $"Editar {ciudadano.Nombre}";
+
+        // Abre un modal (diálogo) con el formulario de edición
+        var result = await dialogService.OpenAsync(titulo, ds =>
+
+    @<RadzenStack Gap="1.5rem">
+        <!-- Estructura del formulario en filas y columnas -->
+        <div class="row">
+            <div class="col-6">Nombre</div>
+            <div class="col-6">Apellidos</div>
+        </div>
+        <div class="row">
+            <div class="col-6"><RadzenTextBox @bind-Value="ciudadano.Nombre" class="w-100" /></div>
+            <div class="col-6"><RadzenTextBox @bind-Value="ciudadano.Apellidos" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-6">Direccion</div>
+            <div class="col-3">No. Casa</div>
+            <div class="col-3">Sexo</div>
+        </div>
+        <div class="row">
+            <div class="col-6"><RadzenTextBox @bind-Value="ciudadano.Direccion" class="w-100" /></div>
+            <div class="col-3"><RadzenTextBox @bind-Value="ciudadano.NoCasa" class="w-100" /></div>
+            <div class="col-3"><RadzenDropDown @bind-Value="ciudadano.Sexo" Data="sexos" TValue="string" ValueProperty="Key" TextProperty="Value" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Email</div>
+            <div class="col-4">Tel. Casa</div>
+            <div class="col-4">Tel. Celular</div>
+        </div>
+        <div class="row">
+            <div class="col-4"><RadzenTextBox @bind-Value="ciudadano.Email" class="w-100" /></div>
+            <div class="col-4"><RadzenTextBox @bind-Value="ciudadano.TelefonoCasa" class="w-100" /></div>
+            <div class="col-4"><RadzenTextBox @bind-Value="ciudadano.TelefonoCelular" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-2">Habilitado</div>
+            <div class="col-1"><RadzenSwitch @bind-Value="ciudadano.Habilitado" /></div>
+            <div class="col-2">Vive en USA</div>
+            <div class="col-1"><RadzenSwitch @bind-Value="ciudadano.EstaEnUSA" /></div>
+            <div class="col-2">Seccion</div>
+            <div class="col-4"><RadzenDropDown @bind-Value="ciudadano.IdSeccion" Data="secciones" TValue="int" ValueProperty="IdSeccion" TextProperty="Nombre" /></div>
+        </div>
+        <div class="row">
+            <div class="col-2">Contraseña</div>
+            <div class="col-4"><RadzenPassword @bind-Value="ciudadano.Password" class="w-100" /></div>
+            <div class="col-2">Tipo Usuario</div>
+            <div class="col-4"><RadzenDropDown @bind-Value="ciudadano.IdTipoUsuario" Data="tipoUsuarios" TValue="int" ValueProperty="IdTipoUsuario" TextProperty="Nombre" /></div>
+        </div>
+        <div class="row">
+            <div class="col-3">Latitud:</div>
+            <div class="col-3"><RadzenNumeric @bind-Value="ciudadano.Latitud" class="w-100" /></div>
+            <div class="col-3">Longitud</div>
+            <div class="col-3"><RadzenNumeric @bind-Value="ciudadano.Longitud" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-6" />
+            <!-- Botones de guardar y cancelar -->
+            <div class="col-3"><RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(ciudadano))" /></div>
+            <div class="col-3"><RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" /></div>
+        </div>
+    </RadzenStack>
+
+    , new DialogOptions()
+    {
+        Draggable = true,
+        ShowClose = true,
+        Resizable = true,
+        Width = "800px",
+        Height = "600px"
+    });
+    }
+
+    // Guarda un ciudadano nuevo o modificado
+    protected async Task Guardar(Ciudadano ciudadano)
+    {
+        Ciudadano resultado;
+        if (string.IsNullOrEmpty(ciudadano.IdCiudadano))
+        {
+            // Si no tiene ID, es nuevo
+            resultado = await ciudadanoManager.Agregar(ciudadano);
+        }
+        else
+        {
+            // Si tiene ID, se edita
+            resultado = await ciudadanoManager.Modificar(ciudadano);
+        }
+
+        if (resultado != null)
+        {
+            // Si se guarda exitosamente, se cierra el diálogo
+            dialogService.Close(true);
+        }
+        else
+        {
+            // Muestra alerta si hubo error
+            await dialogService.Alert(ciudadanoManager.Error, "Error al guardar");
+        }
+    }
+
+    // Elimina un ciudadano después de confirmar
+    protected async Task Eliminar(Ciudadano ciudadano)
+    {
+        var r = await dialogService.Confirm($"Realmente deseas eliminar a {ciudadano.Nombre}? ", "Advertencia", new ConfirmOptions() { OkButtonText = "Si", CancelButtonText = "No" });
+
+        if (r.Value)
+        {
+            var eliminado = await ciudadanoManager.Eliminar(ciudadano.IdCiudadano);
+            if (eliminado)
+            {
+                // Si se elimina, se actualiza la tabla
+                ActualizarTabla();
+            }
+        }
+    }
+}

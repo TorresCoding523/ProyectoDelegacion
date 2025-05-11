@@ -1,0 +1,119 @@
+﻿@page "/catalogos/Documento"
+
+<h3>Catálogo Documento</h3>
+
+<br />
+<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new Documento()))" />
+<br />
+<br />
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@documentos" TItem="Documento">
+    <Columns>
+        <RadzenDataGridColumn Property="IdDocumento" Title="ID" Width="50" />
+        <RadzenDataGridColumn Property="Nombre" Title="Nombre" Width="50" />
+        <RadzenDataGridColumn Property="Costo" Title="Costo" Width="50" />
+        <RadzenDataGridColumn Property="URLPlantilla" Title="URLPlantilla" Width="50" />
+        <RadzenDataGridColumn Property="Notas" Title="Notas" Width="50" />
+        <RadzenDataGridColumn Title="Acciones">
+            <Template Context="data">
+                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
+                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    DocumentoManager documentoManager;
+    List<Documento> documentos;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        documentoManager = FabricManager.DocumentoManager;
+        ActualizarTabla();
+    }
+
+    void ActualizarTabla()
+    {
+        documentos = documentoManager.ObtenerTodos().Result ?? new List<Documento>();
+        InvokeAsync(StateHasChanged);
+    }
+
+    async Task Editar(Documento documento)
+    {
+        string titulo = documento.IdDocumento == 0 ? "Nuevo Documento" : $"Editar {documento.Nombre}";
+        var result = await dialogService.OpenAsync(titulo, ds =>
+
+    @<RadzenStack Gap="1.5rem">
+        <div class="row">
+            <div class="col-4">Nombre</div>
+            <div class="col-8"><RadzenTextBox @bind-Value="documento.Nombre" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Costo</div>
+            <div class="col-8"><RadzenNumeric @bind-Value="documento.Costo" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">URLPlantilla</div>
+            <div class="col-8"><RadzenTextBox @bind-Value="documento.URLPlantilla" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Notas</div>
+            <div class="col-8"><RadzenTextArea @bind-Value="documento.Notas" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="col-3"><RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(documento))" /></div>
+            <div class="col-3"><RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" /></div>
+        </div>
+    </RadzenStack>
+
+    , new DialogOptions()
+    {
+        Draggable = true,
+        ShowClose = true,
+        Resizable = true,
+        Width = "600px",
+        Height = "300px"
+    });
+    }
+
+    async Task Guardar(Documento documento)
+    {
+        Documento resultado;
+        if (documento.IdDocumento == 0)
+        {
+            resultado = await documentoManager.Agregar(documento);
+        }
+        else
+        {
+            resultado = await documentoManager.Modificar(documento);
+        }
+
+        if (resultado != null)
+        {
+            dialogService.Close(true);
+            ActualizarTabla();
+        }
+        else
+        {
+            await dialogService.Alert(documentoManager.Error, "Error al guardar");
+        }
+    }
+
+    async Task Eliminar(Documento documento)
+    {
+        var r = await dialogService.Confirm($"¿Realmente deseas eliminar el documento '{documento.Nombre}'?", "Advertencia",
+            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+
+        if (r.Value)
+        {
+            var eliminado = await documentoManager.Eliminar(documento.IdDocumento.ToString());
+            if (eliminado)
+            {
+                ActualizarTabla();
+            }
+        }
+    }
+}

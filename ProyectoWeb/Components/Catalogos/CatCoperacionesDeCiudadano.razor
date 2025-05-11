@@ -1,0 +1,158 @@
+﻿@page "/catalogos/CoperacionesDeCiudadano"
+
+<h3>Coperaciones De Ciudadano</h3>
+
+<br />
+<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new CooperacionesDeCiudadano()))" />
+<br />
+<br />
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@cooperacionesDeCiudadanos" TItem="CooperacionesDeCiudadano">
+    <Columns>
+        <RadzenDataGridColumn Property="Id" Title="ID" Width="50" />
+        <RadzenDataGridColumn Property="IdCiudadano" Title="Ciudadano" Width="50" />
+        <RadzenDataGridColumn Property="IdCooperacion" Title="Cooperacion" Width="50" />
+        <RadzenDataGridColumn Property="FechaDePago" Title="Fecha De Pago" Width="50" />
+        <RadzenDataGridColumn Property="EsParcial" Title="Es Parcial" Width="50" />
+        <RadzenDataGridColumn Property="Notas" Title="Notas" Width="50" />
+        <RadzenDataGridColumn Title="Acciones">
+            <Template Context="data">
+                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
+                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    CooperacionesDeCiudadanoManager cooperacionesDeCiudadanoManager;
+    List<CooperacionesDeCiudadano> cooperacionesDeCiudadanos;
+
+    CiudadanoManager ciudadanoManager;
+    List<Ciudadano> ciudadanos;
+
+    CooperacionManager cooperacionManager;
+    List<Cooperacion> cooperacions;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        cooperacionesDeCiudadanoManager = FabricManager.cooperacionesDeCiudadanoManager;
+        ciudadanoManager = FabricManager.CiudadanoManager;
+        cooperacionManager = FabricManager.CooperacionManager;
+
+        ciudadanos = ciudadanoManager.ObtenerTodos().Result;
+        cooperacions = cooperacionManager.ObtenerTodos().Result;
+
+        ActualizarTabla();
+    }
+
+    void ActualizarTabla()
+    {
+        cooperacionesDeCiudadanos = cooperacionesDeCiudadanoManager.ObtenerTodos().Result ?? new List<CooperacionesDeCiudadano>();
+        InvokeAsync(StateHasChanged);
+    }
+
+    async Task Editar(CooperacionesDeCiudadano cooperacionesDeCiudadano)
+    {
+        string titulo = cooperacionesDeCiudadano.Id == 0 ? "Nueva Cooperacion de Ciudadano" : $"Editar {cooperacionesDeCiudadano.Id}";
+        var result = await dialogService.OpenAsync(titulo, ds =>
+
+    @<RadzenStack Gap="2.5rem">
+        <div class="row">
+            <div class="col-6">Ciudadano</div>
+            <div class="col-6">Cooperación</div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <RadzenDropDown @bind-Value="cooperacionesDeCiudadano.IdCiudadano" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" />
+            </div>
+            <div class="col-6">
+                <RadzenDropDown @bind-Value="cooperacionesDeCiudadano.IdCooperacion" Data="cooperacions" TValue="int" ValueProperty="IdCooperacion" TextProperty="Nombre" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6">Fecha De Pago</div>
+            <div class="col-6">Usuario Receptor</div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <RadzenDatePicker @bind-Value="cooperacionesDeCiudadano.FechaDePago" class="w-100" />
+            </div>
+            <div class="col-6">
+                <RadzenDropDown @bind-Value="cooperacionesDeCiudadano.idUsuarioReceptor" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-2">Es Parcial</div>
+            <div class="col-2">
+                <RadzenSwitch @bind-Value="cooperacionesDeCiudadano.EsParcial" />
+            </div>
+            <div class="col-2">Notas</div>
+            <div class="col-6">
+                <RadzenTextArea @bind-Value="cooperacionesDeCiudadano.Notas" class="w-100" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="col-3">
+                <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(cooperacionesDeCiudadano))" />
+            </div>
+            <div class="col-3">
+                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" />
+            </div>
+        </div>
+    </RadzenStack>
+
+
+    , new DialogOptions()
+    {
+        Draggable = true,
+        ShowClose = true,
+        Resizable = true,
+        Width = "600px",
+        Height = "300px"
+    });
+    }
+
+    async Task Guardar(CooperacionesDeCiudadano cooperacionesDeCiudadano)
+    {
+        CooperacionesDeCiudadano resultado;
+        if (cooperacionesDeCiudadano.Id == 0)
+        {
+            resultado = await cooperacionesDeCiudadanoManager.Agregar(cooperacionesDeCiudadano);
+        }
+        else
+        {
+            resultado = await cooperacionesDeCiudadanoManager.Modificar(cooperacionesDeCiudadano);
+        }
+
+        if (resultado != null)
+        {
+            dialogService.Close(true);
+            ActualizarTabla();
+        }
+        else
+        {
+            await dialogService.Alert(cooperacionesDeCiudadanoManager.Error, "Error al guardar");
+        }
+    }
+
+    async Task Eliminar(CooperacionesDeCiudadano cooperacionesDeCiudadano)
+    {
+        var r = await dialogService.Confirm($"¿Realmente deseas eliminar la Cooperacion del Ciudadano '{cooperacionesDeCiudadano.Id}'?", "Advertencia",
+            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+
+        if (r.Value)
+        {
+            var eliminado = await cooperacionesDeCiudadanoManager.Eliminar(cooperacionesDeCiudadano.Id.ToString());
+            if (eliminado)
+            {
+                ActualizarTabla();
+            }
+        }
+    }
+}
