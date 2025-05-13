@@ -1,6 +1,6 @@
 ﻿@page "/catalogos/Aviso"
 
-<h3>Aviso</h3>
+<h3>Catálogo Aviso</h3>
 
 <br />
 <RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new Aviso()))" />
@@ -52,25 +52,32 @@ Data="@avisos" TItem="Aviso">
 
     @<RadzenStack Gap="1.5rem">
         <div class="row">
-            <div class="col-4">Titulo</div>
-            <div class="col-8"><RadzenTextBox @bind-Value="aviso.Titulo" class="w-100" /></div>
+            <div class="col-md-6">
+                <label>Título</label>
+                <RadzenTextBox @bind-Value="aviso.Titulo" class="w-100" />
+            </div>
+            <div class="col-md-6">
+                <label>Fecha</label>
+                <RadzenDatePicker @bind-Value="aviso.Fecha" class="w-100" />
+            </div>
         </div>
+
         <div class="row">
-            <div class="col-4">Texto</div>
-            <div class="col-8"><RadzenTextArea @bind-Value="aviso.Texto" class="w-100" /></div>
+            <div class="col-md-6">
+                <label>Ciudadano Responsable</label>
+                <RadzenDropDown @bind-Value="aviso.IdCuidadanoResponsable" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" class="w-100" />
+            </div>
+            <div class="col-md-6">
+                <label>Texto</label>
+                <RadzenTextArea @bind-Value="aviso.Texto" class="w-100" />
+            </div>
         </div>
-        <div class="row">
-            <div class="col-4">Fecha</div>
-            <div class="col-8"><RadzenDatePicker @bind-Value="aviso.Fecha" class="w-100" /></div>
-        </div>
-        <div class="row">
-            <div class="col-4">Cuidadano Responsable</div>
-            <div class="col-8"><RadzenTextBox @bind-Value="aviso.IdCuidadanoResponsable" class="w-100" /></div>
-        </div>
-        <div class="row">
-            <div class="col-6"></div>
-            <div class="col-3"><RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(aviso))" /></div>
-            <div class="col-3"><RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" /></div>
+
+        <div class="row mt-3">
+            <div class="col-12 text-end">
+                <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(aviso))" Style="margin-right: 10px;" />
+                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" />
+            </div>
         </div>
     </RadzenStack>
 
@@ -80,7 +87,7 @@ Data="@avisos" TItem="Aviso">
         ShowClose = true,
         Resizable = true,
         Width = "600px",
-        Height = "300px"
+        Height = "350px"
     });
     }
 

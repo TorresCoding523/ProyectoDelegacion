@@ -1,6 +1,6 @@
 ﻿@page "/catalogos/Gasto"
 
-<h3>Gasto</h3>
+<h3>Catálogo Gasto</h3>
 
 <br />
 <RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new Gasto()))" />
@@ -54,7 +54,7 @@
 
     @<RadzenStack Gap="2.5rem">
         <div class="row">
-            <div class="col-6">FechaGasto</div>
+            <div class="col-6">Fecha Gasto</div>
             <div class="col-6">Descripcion</div>
         </div>
         <div class="row">
@@ -68,7 +68,7 @@
 
         <div class="row">
             <div class="col-6">Monto</div>
-            <div class="col-6">IdUsuarioAutorizado</div>
+            <div class="col-6">Usuario Autorizado</div>
         </div>
         <div class="row">
             <div class="col-6">
@@ -97,7 +97,7 @@
         ShowClose = true,
         Resizable = true,
         Width = "600px",
-        Height = "300px"
+        Height = "500px"
     });
     }
 

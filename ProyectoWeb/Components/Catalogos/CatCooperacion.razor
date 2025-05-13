@@ -1,6 +1,6 @@
 ﻿@page "/catalogos/Cooperacion"
 
-<h3>Cooperacion</h3>
+<h3>Catálogo Cooperacion</h3>
 
 <br />
 <RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new Cooperacion()))" />
@@ -60,11 +60,11 @@
             <div class="col-8"><RadzenNumeric @bind-Value="cooperacion.Monto" class="w-100" /></div>
         </div>
         <div class="row">
-            <div class="col-4">FechaDeInicio</div>
+            <div class="col-4">Fecha De Inicio</div>
             <div class="col-8"><RadzenDatePicker @bind-Value="cooperacion.FechaDeInicio" class="w-100" /></div>
         </div>
         <div class="row">
-            <div class="col-4">FechaLimiteDePago</div>
+            <div class="col-4">Fecha Limite De Pago</div>
             <div class="col-8"><RadzenDatePicker @bind-Value="cooperacion.FechaLimiteDePago" class="w-100" /></div>
         </div>
         <div class="row">
@@ -80,7 +80,7 @@
         ShowClose = true,
         Resizable = true,
         Width = "600px",
-        Height = "300px"
+        Height = "500px"
     });
     }
 
