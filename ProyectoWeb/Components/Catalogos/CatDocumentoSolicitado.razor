@@ -9,11 +9,11 @@
 <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                 Data="@documentoSolicitados" TItem="DocumentoSolicitado">
     <Columns>
-        <RadzenDataGridColumn Property="FechaSolicitud" Title="URLPlantilla" Width="50" />
-        <RadzenDataGridColumn Property="FechaEntrega" Title="Notas" Width="50" />
-        <RadzenDataGridColumn Property="FechaPago" Title="Notas" Width="50" />
-        <RadzenDataGridColumn Property="MontoPagado" Title="Notas" Width="50" />
-        <RadzenDataGridColumn Property="Finalidad" Title="Notas" Width="50" />
+        <RadzenDataGridColumn Property="FechaSolicitud" Title="Fecha de Solicitud" Width="50" />
+        <RadzenDataGridColumn Property="FechaEntrega" Title="Fecha de Entrega" Width="50" />
+        <RadzenDataGridColumn Property="FechaPago" Title="Fecha de Pago" Width="50" />
+        <RadzenDataGridColumn Property="MontoPagado" Title="Monto Pagado" Width="50" />
+        <RadzenDataGridColumn Property="Finalidad" Title="Finalidad" Width="50" />
         <RadzenDataGridColumn Property="Notas" Title="Notas"  Width="50"   />
         <RadzenDataGridColumn Title="Acciones">
             <Template Context="data">
@@ -120,7 +120,7 @@
     async Task Guardar(DocumentoSolicitado documentoSolicitado)
     {
         DocumentoSolicitado resultado;
-        if (documentoSolicitado.IdDocumento == 0)
+        if (documentoSolicitado.IdDocumentoSolicitado == 0)
         {
             resultado = await documentoSolicitadoManager.Agregar(documentoSolicitado);
         }
