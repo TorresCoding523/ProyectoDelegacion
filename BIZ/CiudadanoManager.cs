@@ -50,7 +50,7 @@ namespace BIZ
                 var c = JsonConvert.SerializeObject(datos);
                 var body = new StringContent(c, Encoding.UTF8, "application/json");
                 HttpResponseMessage response = await
-                    _httpClient.PostAsync($"api/Login", body).ConfigureAwait(false);
+                    _httpClient.PostAsync($"api/Ciudadano/Login", body).ConfigureAwait(false);
                 var content = await
                     response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (response.IsSuccessStatusCode)

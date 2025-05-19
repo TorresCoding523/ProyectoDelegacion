@@ -1,5 +1,5 @@
 ﻿@page "/"
-@* @layout LoginLayout *@
+@layout LoginLayout
 
 <PageTitle>Home</PageTitle>
 
@@ -38,7 +38,7 @@ Welcome to your new app.
         if(ciudadano != null)
         {
             COMMON.Params.UsuarioConectado = ciudadano.Nombre;
-            navigationManager.NavigateTo("/InicioUsuario");
+            navigationManager.NavigateTo("/catalogos/Inicio");
         }
         else
         {
@@ -48,6 +48,6 @@ Welcome to your new app.
     }
 
     void ButtonClicked(){
-        navigationManager.NavigateTo("/InicioUsuario");
+        navigationManager.NavigateTo("/catalogos/Inicio");
     }
 }

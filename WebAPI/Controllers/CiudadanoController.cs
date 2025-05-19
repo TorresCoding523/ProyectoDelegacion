@@ -20,7 +20,7 @@ namespace WebAPI.Controllers
 			try
 			{
 				Dictionary<string, string> parametros = new Dictionary<string, string>();
-				parametros.Add("Operacion","9");
+				//parametros.Add("Operacion","9");
 				parametros.Add("user", datos.User);
 				parametros.Add("password", datos.Password);
 				var resultado = _repositorio.EjecutarProcedimiento<Ciudadano>("PROC_Ciudadano", parametros);
