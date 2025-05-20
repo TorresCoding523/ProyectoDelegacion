@@ -12,5 +12,6 @@ namespace COMMON.Entidades
         public int IdTipoUsuario { get; set; }
         public string Nombre { get; set; }
         public string Notas { get; set; }
+        //public bool EsAdministrador { get; set; }
     }
 }

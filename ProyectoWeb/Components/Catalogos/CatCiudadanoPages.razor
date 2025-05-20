@@ -125,11 +125,17 @@
             <div class="col-4"><RadzenDropDown @bind-Value="ciudadano.IdTipoUsuario" Data="tipoUsuarios" TValue="int" ValueProperty="IdTipoUsuario" TextProperty="Nombre" /></div>
         </div>
         <div class="row">
-            <div class="col-3">Latitud:</div>
-            <div class="col-3"><RadzenNumeric @bind-Value="ciudadano.Latitud" class="w-100" /></div>
-            <div class="col-3">Longitud</div>
-            <div class="col-3"><RadzenNumeric @bind-Value="ciudadano.Longitud" class="w-100" /></div>
+            <div class="col-md-4 d-flex align-items-center">
+                <label class="me-2">Latitud:</label>
+                <RadzenNumeric @bind-Value="ciudadano.Latitud" class="w-100" />
+            </div>
+
+            <div class="col-md-4 d-flex align-items-center">
+                <label class="me-2">Longitud:</label>
+                <RadzenNumeric @bind-Value="ciudadano.Longitud" class="w-100" />
+            </div>
         </div>
+
         <div class="row">
             <div class="col-6" />
             <!-- Botones de guardar y cancelar -->

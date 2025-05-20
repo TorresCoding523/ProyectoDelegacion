@@ -1,13 +1,6 @@
 ﻿@page "/"
 @layout LoginLayout
 
-<PageTitle>Home</PageTitle>
-
-<h1>Hello, world!</h1>
-<p>Total de ciudadano @total </p>
-
-Welcome to your new app.
-
 <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
     <RadzenTextBox @bind-Value="userName" Name="user" Placeholder="Usuario" Style="width:100%" />
     <RadzenPassword @bind-Value="password" Name="password" Placeholder="Contraseña" Style="width:100%" class="rz-mt-2" />
@@ -17,7 +10,6 @@ Welcome to your new app.
 
 @code{
     CiudadanoManager CiudadanoManger;
-    int total;
 
     string userName;
     string password;
@@ -26,12 +18,23 @@ Welcome to your new app.
     {
         base.OnInitialized();
         CiudadanoManger = FabricManager.CiudadanoManager;
-        // var ciudadanos = CiudadanoManger.ObtenerTodos().Result;
-        // total = ciudadanos.Count;
     }
 
     async void Onlogin()
     {
+        // Ciudadano ciudadano = await CiudadanoManger.Login(
+        // new LoginModel() { User = userName, Password = password });
+
+        // if (ciudadano != null && ciudadano.EsAdministrador)
+        // {
+        //     COMMON.Params.UsuarioConectado = ciudadano.Nombre;
+        //     navigationManager.NavigateTo("/catalogos/Inicio");
+        // }
+        // else
+        // {
+        //     await dialogService.Alert("Acceso restringido a administradores o credenciales inválidas.", "Error",
+        //         new AlertOptions() { CloseDialogOnEsc = true });
+        // }
 
         Ciudadano ciudadano=CiudadanoManger.Login(
             new LoginModel() { User = userName, Password = password }).Result;
