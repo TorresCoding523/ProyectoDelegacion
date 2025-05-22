@@ -1,7 +1,31 @@
 ﻿@page "/catalogos/Inicio"
 
-<h3>Inicio</h3>
+<RadzenDropDown Data="@options"
+                TextProperty="Text"
+                ValueProperty="Value"
+                @bind-Value="selectedOption"
+                OnValueChange="OnValueChange" />
+
+<p>Valor seleccionado: @selectedOption</p>
 
 @code {
+    private string selectedOption = "";
 
+    private List<SelectOption> options = new()
+    {
+        new SelectOption { Text = "Opción 1", Value = "1" },
+        new SelectOption { Text = "Opción 2", Value = "2" },
+        new SelectOption { Text = "Opción 3", Value = "3" }
+    };
+
+    private void OnValueChange(ChangeEventArgs e)
+    {
+        selectedOption = e.Value.ToString(); // Actualiza la variable con el nuevo valor
+    }
+
+    public class SelectOption
+    {
+        public string? Text { get; set; }
+        public string? Value { get; set; }
+    }
 }

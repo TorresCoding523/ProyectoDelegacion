@@ -7,7 +7,7 @@
 <br />
 <br />
 <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@documentoSolicitados" TItem="DocumentoSolicitado">
+Data="@documentoSolicitados" TItem="DocumentoSolicitado">
     <Columns>
         <RadzenDataGridColumn Property="FechaSolicitud" Title="Fecha de Solicitud" Width="50" />
         <RadzenDataGridColumn Property="FechaEntrega" Title="Fecha de Entrega" Width="50" />
@@ -27,13 +27,13 @@
 @code {
     DocumentoSolicitadoManager documentoSolicitadoManager;
     List<DocumentoSolicitado> documentoSolicitados;
-    
+
     DocumentoManager documentoManager;
     List<Documento> documentos;
-    
+
     CiudadanoManager ciudadanoManager;
     List<Ciudadano> ciudadanos;
-
+    decimal costo;
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -65,7 +65,7 @@
             <div class="col-6">Ciudadano Solicitante</div>
         </div>
         <div class="row">
-            <div class="col-6"><RadzenDropDown @bind-Value="documentoSolicitado.IdDocumento" Data="documentos" TValue="int" ValueProperty="IdDocumento" TextProperty="Nombre" /></div>
+            <div class="col-6"><RadzenDropDown @bind-Value="documentoSolicitado.IdDocumento" Data="documentos" TValue="int" ValueProperty="IdDocumento" TextProperty="Nombre" Change="(args=>seleccionAsync(args,documentoSolicitado))" /></div>
             <div class="col-6"><RadzenDropDown @bind-Value="documentoSolicitado.IdCiudadanoSolicitante" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" /></div>
         </div>
         <div class="row">
@@ -85,7 +85,9 @@
         </div>
         <div class="row">
             <div class="col-4"><RadzenDatePicker @bind-Value="documentoSolicitado.FechaPago" class="w-100" /></div>
-            <div class="col-4"><RadzenDropDown @bind-Value="documentoSolicitado.MontoPagado" Data="documentos" TValue="decimal" ValueProperty="Costo" TextProperty="Costo" /></div>
+            <div class="col-4">
+                <RadzenNumeric @bind-Value="documentoSolicitado.MontoPagado" TValue="decimal" Style="width: 100%;" />
+            </div>
             <div class="col-4"><RadzenDropDown @bind-Value="documentoSolicitado.IdUsuarioQueEntrega" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" /></div>
         </div>
         <div class="row">
@@ -115,6 +117,17 @@
         Width = "700px",
         Height = "600px"
     });
+    }
+    public async Task seleccionAsync(object value, DocumentoSolicitado documentoSolicitado)
+    {
+        if (value is int id)
+        {
+            Documento documento = await FabricManager.DocumentoManager.ObtenerPorId(id.ToString());
+            costo = documento.Costo;
+            documentoSolicitado.MontoPagado = costo;
+            dialogService.Close(false);
+            Editar( documentoSolicitado);
+        }
     }
 
     async Task Guardar(DocumentoSolicitado documentoSolicitado)

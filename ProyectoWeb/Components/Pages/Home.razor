@@ -1,12 +1,104 @@
 ﻿@page "/"
 @layout LoginLayout
 
-<RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
-    <RadzenTextBox @bind-Value="userName" Name="user" Placeholder="Usuario" Style="width:100%" />
-    <RadzenPassword @bind-Value="password" Name="password" Placeholder="Contraseña" Style="width:100%" class="rz-mt-2" />
+<div class="login-container">
+    <RadzenCard class="login-card">
+        <div class="login-header">
+            <h2 class="login-title">Acceso Administrativo</h2>
+            <p class="login-subtitle">Delegación Comunitaria</p>
+        </div>
 
-    <RadzenButton Text="Iniciar sesión" Click="@Onlogin" Style="width:100%" class="rz-mt-3" />
-</RadzenCard>
+        <div class="login-form">
+            <div class="input-container">
+                <RadzenIcon Icon="person" class="input-icon" />
+                <RadzenTextBox @bind-Value="userName"
+                               Name="user"
+                               Placeholder="Usuario"
+                               class="login-input" />
+            </div>
+
+            <div class="input-container">
+                <RadzenIcon Icon="lock" class="input-icon" />
+                <RadzenPassword @bind-Value="password"
+                                Name="password"
+                                Placeholder="Contraseña"
+                                class="login-input" />
+            </div>
+
+            <RadzenButton Text="Iniciar sesión"
+                          Click="@Onlogin"
+                          ButtonStyle="ButtonStyle.Primary"
+                          class="login-button" />
+        </div>
+    </RadzenCard>
+</div>
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f5f7fa;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 450px;
+        padding: 2rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        background-color: white;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-title {
+        color: #2a3f54;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .login-subtitle {
+        color: #73879c;
+        margin: 0;
+    }
+
+    .login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .input-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 12px;
+        color: #73879c;
+    }
+
+    .login-input {
+        width: 100%;
+        padding-left: 40px !important;
+    }
+
+    .login-button {
+        width: 100%;
+        margin-top: 0.5rem;
+        height: 45px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+</style>
 
 @code{
     CiudadanoManager CiudadanoManger;
@@ -22,20 +114,6 @@
 
     async void Onlogin()
     {
-        // Ciudadano ciudadano = await CiudadanoManger.Login(
-        // new LoginModel() { User = userName, Password = password });
-
-        // if (ciudadano != null && ciudadano.EsAdministrador)
-        // {
-        //     COMMON.Params.UsuarioConectado = ciudadano.Nombre;
-        //     navigationManager.NavigateTo("/catalogos/Inicio");
-        // }
-        // else
-        // {
-        //     await dialogService.Alert("Acceso restringido a administradores o credenciales inválidas.", "Error",
-        //         new AlertOptions() { CloseDialogOnEsc = true });
-        // }
-
         Ciudadano ciudadano=CiudadanoManger.Login(
             new LoginModel() { User = userName, Password = password }).Result;
         if(ciudadano != null)

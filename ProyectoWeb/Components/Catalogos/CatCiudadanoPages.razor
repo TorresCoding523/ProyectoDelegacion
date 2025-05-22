@@ -34,13 +34,16 @@
 @code {
     // Declaración de variables y servicios utilizados
     CiudadanoManager ciudadanoManager;
-    TipoUsuarioManager tipoUsuarioManager;
-    SeccionManager seccionManager;
     List<Ciudadano> ciudadanos;
+
+    TipoUsuarioManager tipoUsuarioManager;
     List<TipoUsuario> tipoUsuarios;
+    
+    SeccionManager seccionManager;
+    List<Seccion> secciones;
+    
     Ciudadano item;
     Dictionary<string, string> sexos;
-    List<Seccion> secciones;
 
     // Método que se ejecuta al inicializar el componente
     protected override void OnInitialized()
