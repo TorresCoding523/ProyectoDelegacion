@@ -30,6 +30,6 @@ namespace COMMON.Entidades
         public string URLFotoFachada { get; set; }
         public DateTime FechaUltimoIngreso { get; set; }
         public string Notas { get; set; }
-        //public bool EsAdministrador { get; set; }
+        public bool EsAdministrador { get; set; }
     }
 }

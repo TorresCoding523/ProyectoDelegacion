@@ -114,18 +114,37 @@
 
     async void Onlogin()
     {
-        Ciudadano ciudadano=CiudadanoManger.Login(
-            new LoginModel() { User = userName, Password = password }).Result;
-        if(ciudadano != null)
+        Ciudadano ciudadano = await CiudadanoManger.Login(
+            new LoginModel() { User = userName, Password = password });
+
+        if (ciudadano != null && ciudadano.EsAdministrador)
         {
             COMMON.Params.UsuarioConectado = ciudadano.Nombre;
             navigationManager.NavigateTo("/catalogos/Inicio");
         }
+        else if (ciudadano != null && !ciudadano.EsAdministrador)
+        {
+            dialogService.Alert("Acceso restringido solo para administradores.",
+                "Acceso denegado", new AlertOptions() { CloseDialogOnEsc = true });
+        }
         else
         {
-            dialogService.Alert("Nombre de Usuario y/o contraseña incorrecta",
-            "Erro", new AlertOptions() { CloseDialogOnEsc = true });
+            dialogService.Alert("Nombre de Usuario y/o contraseña incorrecta.",
+                "Error", new AlertOptions() { CloseDialogOnEsc = true });
         }
+
+        // Ciudadano ciudadano=CiudadanoManger.Login(
+        //     new LoginModel() { User = userName, Password = password }).Result;
+        // if(ciudadano != null)
+        // {
+        //     COMMON.Params.UsuarioConectado = ciudadano.Nombre;
+        //     navigationManager.NavigateTo("/catalogos/Inicio");
+        // }
+        // else
+        // {
+        //     dialogService.Alert("Nombre de Usuario y/o contraseña incorrecta",
+        //     "Erro", new AlertOptions() { CloseDialogOnEsc = true });
+        // }
     }
 
     void ButtonClicked(){
