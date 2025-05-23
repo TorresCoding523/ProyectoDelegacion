@@ -27,6 +27,8 @@ namespace BIZ
 
         public static TipoUsuarioManager TipoUsuarioManager => new TipoUsuarioManager(new TipoUsuarioValidator());
 
+        public static InfoDelegacionManager InfoDelegacionManager => new InfoDelegacionManager(new InfoDelegacionValidador());
+
 
     }
 }

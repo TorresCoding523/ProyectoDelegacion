@@ -131,7 +131,19 @@ namespace DAL
 			}
 		}
 
-	}
+        public IDB<InfoDelegacion> InfoDelegacionRepository()
+        {
+            switch (_tipo)
+            {
+                case TipoBD.SQLServer:
+                    return new DBSqlServer<InfoDelegacion>(_cadenaConexion, new InfoDelegacionValidador(), "IdInfoDelegacion", true);
+                case TipoBD.MySql:
+                    return new DBMySql<InfoDelegacion>(_cadenaConexion, new InfoDelegacionValidador(), "IdInfoDelegacion", true);
+                default:
+                    return null;
+            }
+        }
+    }
 	public enum TipoBD
 	{
 		SQLServer,
