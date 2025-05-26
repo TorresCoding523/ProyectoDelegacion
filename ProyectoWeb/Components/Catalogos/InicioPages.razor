@@ -1,100 +1,687 @@
 ﻿@page "/catalogos/Inicio"
 
+<h3>Dashboard Principal - Sistema de Gestión</h3>
 <br />
-<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="@AgregarValidandoUnicoRegistro" />
-<br />
-<br />
-<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@infoDelegacions" TItem="InfoDelegacion">
-    <Columns>
-        <RadzenDataGridColumn Property="Nombre" Title="Nombre" Width="50" />
-        <RadzenDataGridColumn Property="Descripcion" Title="Descripcion" Width="50" />
-        <RadzenDataGridColumn Property="Direccion" Title="Direccion" Width="50" />
-        <RadzenDataGridColumn Property="Telefono" Title="Telefono" Width="50" />
-        <RadzenDataGridColumn Property="Correo" Title="Correo" Width="50" />
-        <RadzenDataGridColumn Title="Acciones">
-            <Template Context="data">
-                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
-                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
-            </Template>
-        </RadzenDataGridColumn>
-    </Columns>
-</RadzenDataGrid>
+
+<!-- Controles de Filtro -->
+<RadzenCard class="rz-mb-3">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+        <RadzenText TextStyle="TextStyle.H6">Filtros:</RadzenText>
+        <RadzenDropDown @bind-Value="@añoSeleccionado" Data="@añosDisponibles"
+                        Change="@ActualizarDashboard" Placeholder="Seleccionar Año" />
+        <RadzenButton Text="Actualizar" Icon="refresh" ButtonStyle="ButtonStyle.Primary"
+                      Click="@ActualizarDashboard" />
+    </RadzenStack>
+</RadzenCard>
+
+<!-- Información de la Delegación -->
+<RadzenRow Gap="1rem" class="rz-mb-4">
+    <RadzenColumn Size="12">
+        <RadzenCard>
+            <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-3">
+                <RadzenIcon Icon="account_balance" /> Información de la Delegación
+            </RadzenText>
+            
+            @if (infoDelegacion != null)
+            {
+                <RadzenStack Gap="1rem">
+                    <RadzenGrid>
+                        <RadzenRow>
+                            <RadzenColumn Size="4">
+                                <RadzenText><strong>Nombre:</strong> @infoDelegacion.Nombre</RadzenText>
+                            </RadzenColumn>
+                            <RadzenColumn Size="4">
+                                <RadzenText><strong>Teléfono:</strong> @infoDelegacion.Telefono</RadzenText>
+                            </RadzenColumn>
+                            <RadzenColumn Size="4">
+                                <RadzenText><strong>Correo:</strong> @infoDelegacion.Correo</RadzenText>
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow>
+                            <RadzenColumn Size="12">
+                                <RadzenText><strong>Dirección:</strong> @infoDelegacion.Direccion</RadzenText>
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow>
+                            <RadzenColumn Size="12">
+                                <RadzenText><strong>Descripción:</strong> @infoDelegacion.Descripcion</RadzenText>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenGrid>
+                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                        <RadzenButton Text="Editar" Icon="edit" ButtonStyle="ButtonStyle.Secondary" 
+                                      Click="@(() => EditarInfoDelegacion(infoDelegacion))" Size="ButtonSize.Small" />
+                    </RadzenStack>
+                </RadzenStack>
+            }
+            else
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Warning" Icon="warning" Title="Información no disponible">
+                    No se ha configurado la información de la delegación.
+                    <RadzenButton Text="Agregar Información" Icon="add" ButtonStyle="ButtonStyle.Success" 
+                                  Click="@(() => EditarInfoDelegacion(new InfoDelegacion()))" 
+                                  Size="ButtonSize.Small" class="rz-mt-2" />
+                </RadzenAlert>
+            }
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+
+<!-- Resumen Estadístico Principal -->
+<RadzenRow Gap="1rem" class="rz-mb-4">
+    <RadzenColumn Size="3">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="people" Style="font-size: 2rem; color: var(--rz-primary);" />
+                <RadzenText TextStyle="TextStyle.H6">Total Ciudadanos</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-primary">
+                    @totalCiudadanos
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="monetization_on" Style="font-size: 2rem; color: var(--rz-success);" />
+                <RadzenText TextStyle="TextStyle.H6">Cooperaciones Activas</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-success">
+                    @totalCooperacionesActivas
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="trending_up" Style="font-size: 2rem; color: var(--rz-success);" />
+                <RadzenText TextStyle="TextStyle.H6">Ingresos Totales</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-success">
+                    $@ingresosTotales.ToString("N2")
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="trending_down" Style="font-size: 2rem; color: var(--rz-danger);" />
+                <RadzenText TextStyle="TextStyle.H6">Gastos Totales</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-danger">
+                    $@gastosTotales.ToString("N2")
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+
+<!-- Estadísticas de Registros -->
+<RadzenRow Gap="1rem" class="rz-mb-4">
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="trending_up" Style="font-size: 2rem; color: var(--rz-success);" />
+                <RadzenText TextStyle="TextStyle.H6">Registros Este Mes</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-success">
+                    @ciudadanosEsteMes
+                </RadzenText>
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-secondary">
+                    Nuevos ciudadanos
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="schedule" Style="font-size: 2rem; color: var(--rz-warning);" />
+                <RadzenText TextStyle="TextStyle.H6">Próximas a Vencer</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-warning">
+                    @proximasAVencer
+                </RadzenText>
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-secondary">
+                    Cooperaciones (7 días)
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="account_balance_wallet" Style="font-size: 2rem; color: var(--rz-primary);" />
+                <RadzenText TextStyle="TextStyle.H6">Total a Recaudar</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-primary">
+                    $@totalMontoActivo.ToString("N2")
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+
+<!-- Gráficos Row 1 -->
+<RadzenRow Gap="1rem" class="rz-mb-4">
+    <RadzenColumn Size="6">
+        <!-- Gráfico de Barras: Ciudadanos por Sección -->
+        <RadzenCard>
+            <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-3">
+                <RadzenIcon Icon="bar_chart" /> Ciudadanos por Sección
+            </RadzenText>
+
+            @if (datosCiudadanosPorSeccion != null && datosCiudadanosPorSeccion.Any())
+            {
+                <RadzenChart>
+                    <RadzenColumnSeries Data="@datosCiudadanosPorSeccion" CategoryProperty="Seccion"
+                                        Title="Ciudadanos" ValueProperty="Cantidad">
+                        <RadzenSeriesDataLabels Visible="true" />
+                    </RadzenColumnSeries>
+                    <RadzenCategoryAxis Padding="20" />
+                    <RadzenValueAxis>
+                        <RadzenGridLines Visible="true" />
+                        <RadzenAxisTitle Text="Cantidad de Ciudadanos" />
+                    </RadzenValueAxis>
+                    <RadzenLegend Visible="false" />
+                </RadzenChart>
+            }
+            else
+            {
+                <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                <RadzenText TextStyle="TextStyle.Body2" class="rz-mt-2">Cargando datos de secciones...</RadzenText>
+            }
+        </RadzenCard>
+    </RadzenColumn>
+
+    <RadzenColumn Size="6">
+        <!-- Gráfico de Pastel: Distribución por Tipo de Usuario -->
+        <RadzenCard>
+            <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-3">
+                <RadzenIcon Icon="pie_chart" /> Distribución por Tipo de Usuario
+            </RadzenText>
+
+            @if (datosTipoUsuario != null && datosTipoUsuario.Any())
+            {
+                <RadzenChart>
+                    <RadzenPieSeries Data="@datosTipoUsuario" Title="Tipo de Usuario"
+                                     CategoryProperty="TipoUsuario" ValueProperty="Cantidad">
+                        <RadzenSeriesDataLabels Visible="true" />
+                    </RadzenPieSeries>
+                    <RadzenLegend Position="LegendPosition.Right" />
+                </RadzenChart>
+            }
+            else
+            {
+                <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                <RadzenText TextStyle="TextStyle.Body2" class="rz-mt-2">Cargando tipos de usuario...</RadzenText>
+            }
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+
+<!-- Gráficos Row 2 -->
+<RadzenRow Gap="1rem" class="rz-mb-4">
+    <RadzenColumn Size="6">
+        <!-- Tendencia de Registros -->
+        <RadzenCard>
+            <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-3">
+                <RadzenIcon Icon="trending_up" /> Tendencia de Registros (Últimos 12 meses)
+            </RadzenText>
+
+            @if (datosRegistrosTendencia != null && datosRegistrosTendencia.Any())
+            {
+                <RadzenChart>
+                    <RadzenLineSeries Data="@datosRegistrosTendencia" CategoryProperty="Mes"
+                                      Title="Nuevos Registros" ValueProperty="Cantidad">
+                        <RadzenMarkers MarkerType="MarkerType.Circle" />
+                        <RadzenSeriesDataLabels Visible="true" />
+                    </RadzenLineSeries>
+                    <RadzenCategoryAxis Padding="20" />
+                    <RadzenValueAxis>
+                        <RadzenGridLines Visible="true" />
+                        <RadzenAxisTitle Text="Cantidad de Registros" />
+                    </RadzenValueAxis>
+                </RadzenChart>
+            }
+            else
+            {
+                <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                <RadzenText TextStyle="TextStyle.Body2" class="rz-mt-2">Cargando tendencia de registros...</RadzenText>
+            }
+        </RadzenCard>
+    </RadzenColumn>
+
+    <RadzenColumn Size="6">
+        <!-- Gráfico de Líneas: Ingresos vs Gastos -->
+        <RadzenCard>
+            <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-3">
+                <RadzenIcon Icon="trending_up" /> Ingresos vs Gastos (@añoSeleccionado)
+            </RadzenText>
+
+            @if (datosIngresosVsGastos != null && datosIngresosVsGastos.Any())
+            {
+                <RadzenChart>
+                    <RadzenLineSeries Data="@datosIngresosVsGastos" CategoryProperty="Mes"
+                                      Title="Ingresos por Cooperaciones" ValueProperty="Ingresos">
+                        <RadzenMarkers MarkerType="MarkerType.Circle" />
+                        <RadzenSeriesDataLabels Visible="true" />
+                    </RadzenLineSeries>
+                    <RadzenLineSeries Data="@datosIngresosVsGastos" CategoryProperty="Mes"
+                                      Title="Gastos" ValueProperty="Gastos">
+                        <RadzenMarkers MarkerType="MarkerType.Square" />
+                        <RadzenSeriesDataLabels Visible="true" />
+                    </RadzenLineSeries>
+                    <RadzenCategoryAxis Padding="20" />
+                    <RadzenValueAxis>
+                        <RadzenGridLines Visible="true" />
+                        <RadzenAxisTitle Text="Monto ($)" />
+                    </RadzenValueAxis>
+                    <RadzenLegend Position="LegendPosition.Top" />
+                </RadzenChart>
+            }
+            else
+            {
+                <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                <RadzenText TextStyle="TextStyle.Body2" class="rz-mt-2">Cargando datos financieros...</RadzenText>
+            }
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+
+<!-- Tabla de Cooperaciones Activas -->
+<RadzenCard>
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-3">
+        <RadzenIcon Icon="monetization_on" /> Cooperaciones Activas Próximas a Vencer
+    </RadzenText>
+
+    @if (cooperacionesActivasProximas != null && cooperacionesActivasProximas.Any())
+    {
+        <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false"
+                        FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="5" AllowPaging="true"
+                        PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                        Data="@cooperacionesActivasProximas" TItem="Cooperacion">
+            <Columns>
+                <RadzenDataGridColumn Property="Nombre" Title="Nombre" Width="150px">
+                    <Template Context="data">
+                        <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="@data.Nombre" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="Descripcion" Title="Descripción" Width="200px" />
+                <RadzenDataGridColumn Property="Monto" Title="Monto" Width="120px" TextAlign="TextAlign.Right">
+                    <Template Context="data">
+                        <RadzenText TextStyle="TextStyle.Body1" class="rz-color-success">
+                            $@data.Monto.ToString("N2")
+                        </RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="FechaLimiteDePago" Title="Fecha Límite" Width="120px">
+                    <Template Context="data">
+                        <RadzenText TextStyle="TextStyle.Body1"
+                                    class="@(EsProximoAVencer(data.FechaLimiteDePago) ? "rz-color-danger" : "rz-color-base")">
+                            @data.FechaLimiteDePago.ToString("dd/MM/yyyy")
+                        </RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Días Restantes" Width="120px" TextAlign="TextAlign.Center">
+                    <Template Context="data">
+                        @{
+                            var diasRestantes = (data.FechaLimiteDePago.Date - DateTime.Now.Date).Days;
+                            var badgeStyle = diasRestantes <= 7 ? BadgeStyle.Danger :
+                            diasRestantes <= 15 ? BadgeStyle.Warning : BadgeStyle.Info;
+                        }
+                        <RadzenBadge BadgeStyle="@badgeStyle" Text="@diasRestantes.ToString()" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Acciones" Width="120px">
+                    <Template Context="data">
+                        <RadzenButton Click="(()=>VerDetalle(data))" ButtonStyle="ButtonStyle.Info"
+                                      Icon="visibility" Size="ButtonSize.Small" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    }
+    else if (cooperacionesActivasProximas == null)
+    {
+        <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        <RadzenText TextStyle="TextStyle.Body2" class="rz-mt-2">Cargando cooperaciones activas...</RadzenText>
+    }
+    else
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Info" Icon="info" Title="Sin cooperaciones próximas a vencer">
+            No hay cooperaciones próximas a vencer en los próximos 15 días.
+        </RadzenAlert>
+    }
+</RadzenCard>
 
 @code {
+    // Managers
+    CiudadanoManager ciudadanoManager;
+    SeccionManager seccionManager;
+    TipoUsuarioManager tipoUsuarioManager;
+    CooperacionManager cooperacionManager;
+    GastoManager gastoManager;
+    CooperacionesDeCiudadanoManager cooperacionesDeCiudadanoManager;
     InfoDelegacionManager infoDelegacionManager;
-    List<InfoDelegacion> infoDelegacions;
 
-    protected override void OnInitialized()
+    // Variables para filtros
+    int añoSeleccionado = DateTime.Now.Year;
+    List<int> añosDisponibles = new List<int>();
+
+    // Variables para datos de gráficos
+    List<DatoCiudadanosPorSeccion> datosCiudadanosPorSeccion;
+    List<DatoTipoUsuario> datosTipoUsuario;
+    List<DatoIngresosVsGastos> datosIngresosVsGastos;
+    List<DatoRegistrosTendencia> datosRegistrosTendencia;
+
+    // Variables para resumen
+    int totalCiudadanos = 0;
+    int totalSecciones = 0;
+    decimal ingresosTotales = 0;
+    decimal gastosTotales = 0;
+    int totalCooperacionesActivas = 0;
+    decimal totalMontoActivo = 0;
+    int proximasAVencer = 0;
+    int ciudadanosEsteMes = 0;
+
+    // Variables para cooperaciones
+    List<Cooperacion> cooperacionesActivasProximas;
+
+    // Variable para información de delegación
+    InfoDelegacion infoDelegacion;
+
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
+
+        // Inicializar managers
+        ciudadanoManager = FabricManager.CiudadanoManager;
+        seccionManager = FabricManager.SeccionManager;
+        tipoUsuarioManager = FabricManager.TipoUsuarioManager;
+        cooperacionManager = FabricManager.CooperacionManager;
+        gastoManager = FabricManager.GastoManager;
+        cooperacionesDeCiudadanoManager = FabricManager.cooperacionesDeCiudadanoManager;
         infoDelegacionManager = FabricManager.InfoDelegacionManager;
-        ActualizarTabla();
-    }
 
-    void ActualizarTabla()
-    {
-        infoDelegacions = infoDelegacionManager.ObtenerTodos().Result ?? new List<InfoDelegacion>();
-        InvokeAsync(StateHasChanged);
-    }
-
-    async Task AgregarValidandoUnicoRegistro()
-    {
-        // Validar si ya existe una fila en la tabla
-        if (infoDelegacions != null && infoDelegacions.Count > 0)
+        // Inicializar años disponibles
+        for (int año = DateTime.Now.Year; año >= DateTime.Now.Year - 5; año--)
         {
-            await dialogService.Alert("Solo se permite un registro en Informacion Delegacion. Elimine el existente para agregar uno nuevo.", "Registro único");
-            return;
+            añosDisponibles.Add(año);
         }
 
-        // Si no existe ninguna fila, permite abrir el diálogo de edición
-        await Editar(new InfoDelegacion());
+        await ActualizarDashboard();
     }
 
-    async Task Editar(InfoDelegacion infoDelegacion)
+    async Task ActualizarDashboard()
     {
-        string titulo = infoDelegacion.IdInfoDelegacion == 0 ? "Nueva Informacion " : $"Editar {infoDelegacion.Nombre}";
-        var result = await dialogService.OpenAsync(titulo, ds =>
-
-    @<RadzenStack Gap="1.5rem">
-        <div class="row">
-            <div class="col-4">Nombre</div>
-            <div class="col-8"><RadzenTextBox @bind-Value="infoDelegacion.Nombre" class="w-100" /></div>
-        </div>
-        <div class="row">
-            <div class="col-4">Descripcion</div>
-            <div class="col-8"><RadzenTextArea @bind-Value="infoDelegacion.Descripcion" class="w-100" /></div>
-        </div>
-        <div class="row">
-            <div class="col-4">Direccion</div>
-            <div class="col-8"><RadzenTextBox @bind-Value="infoDelegacion.Direccion" class="w-100" /></div>
-        </div>
-        <div class="row">
-            <div class="col-4">Telefono</div>
-            <div class="col-8"><RadzenTextBox @bind-Value="infoDelegacion.Telefono" class="w-100" /></div>
-        </div>
-        <div class="row">
-            <div class="col-4">Correo</div>
-            <div class="col-8"><RadzenTextBox @bind-Value="infoDelegacion.Correo" class="w-100" /></div>
-        </div>
-        <div class="row">
-            <div class="col-6"></div>
-            <div class="col-3"><RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(infoDelegacion))" /></div>
-            <div class="col-3"><RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" /></div>
-        </div>
-    </RadzenStack>
-
-    , new DialogOptions()
-    {
-        Draggable = true,
-        ShowClose = true,
-        Resizable = true,
-        Width = "600px",
-        Height = "410px"
-    });
+        try
+        {
+            await CargarInfoDelegacion();
+            await CargarDatosCiudadanosPorSeccion();
+            await CargarDatosTipoUsuario();
+            await CargarDatosIngresosVsGastos();
+            await CargarDatosRegistrosTendencia();
+            await CargarCooperacionesActivas();
+            await CargarResumen();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al actualizar dashboard: {ex.Message}");
+        }
     }
 
-    async Task Guardar(InfoDelegacion infoDelegacion)
+    async Task CargarInfoDelegacion()
+    {
+        var delegaciones = await infoDelegacionManager.ObtenerTodos();
+        infoDelegacion = delegaciones?.FirstOrDefault();
+    }
+
+    async Task CargarDatosCiudadanosPorSeccion()
+    {
+        var ciudadanos = await ciudadanoManager.ObtenerTodos();
+        var secciones = await seccionManager.ObtenerTodos();
+
+        if (ciudadanos != null && secciones != null)
+        {
+            datosCiudadanosPorSeccion = secciones
+            .Select(s => new DatoCiudadanosPorSeccion
+                    {
+                        Seccion = s.Nombre,
+                        Cantidad = ciudadanos.Count(c => c.IdSeccion == s.IdSeccion)
+                    })
+            .Where(d => d.Cantidad > 0)
+            .OrderByDescending(d => d.Cantidad)
+            .Take(10) // Solo los top 10
+            .ToList();
+
+            totalSecciones = secciones.Count;
+        }
+    }
+
+    async Task CargarDatosTipoUsuario()
+    {
+        var ciudadanos = await ciudadanoManager.ObtenerTodos();
+        var tiposUsuario = await tipoUsuarioManager.ObtenerTodos();
+
+        if (ciudadanos != null && tiposUsuario != null)
+        {
+            datosTipoUsuario = tiposUsuario
+            .Select(t => new DatoTipoUsuario
+                    {
+                        TipoUsuario = t.Nombre,
+                        Cantidad = ciudadanos.Count(c => c.IdTipoUsuario == t.IdTipoUsuario)
+                    })
+            .Where(d => d.Cantidad > 0)
+            .OrderByDescending(d => d.Cantidad)
+            .ToList();
+
+            totalCiudadanos = ciudadanos.Count;
+
+            // Calcular ciudadanos este mes
+            var inicioMes = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            ciudadanosEsteMes = ciudadanos.Count(c => c.FechaAlta >= inicioMes);
+        }
+    }
+
+    async Task CargarDatosIngresosVsGastos()
+    {
+        var cooperacionesPagadas = await cooperacionesDeCiudadanoManager.ObtenerTodos();
+        var gastos = await gastoManager.ObtenerTodos();
+
+        datosIngresosVsGastos = new List<DatoIngresosVsGastos>();
+
+        for (int mes = 1; mes <= 12; mes++)
+        {
+            var nombreMes = new DateTime(añoSeleccionado, mes, 1).ToString("MMM");
+
+            decimal ingresosMes = 0;
+            decimal gastosMes = 0;
+
+            if (cooperacionesPagadas != null)
+            {
+                var cooperaciones = await cooperacionManager.ObtenerTodos();
+                if (cooperaciones != null)
+                {
+                    ingresosMes = cooperacionesPagadas
+                    .Where(cp => cp.FechaDePago.Year == añoSeleccionado && cp.FechaDePago.Month == mes)
+                    .Sum(cp =>
+                    {
+                        var coop = cooperaciones.FirstOrDefault(c => c.IdCooperacion == cp.IdCooperacion);
+                        return coop?.Monto ?? 0;
+                    });
+                }
+            }
+
+            if (gastos != null)
+            {
+                gastosMes = gastos
+                .Where(g => g.FechaGasto.Year == añoSeleccionado && g.FechaGasto.Month == mes)
+                .Sum(g => g.Monto);
+            }
+
+            datosIngresosVsGastos.Add(new DatoIngresosVsGastos
+                    {
+                        Mes = nombreMes,
+                        Ingresos = ingresosMes,
+                        Gastos = gastosMes
+                    });
+        }
+    }
+
+    async Task CargarDatosRegistrosTendencia()
+    {
+        var ciudadanos = await ciudadanoManager.ObtenerTodos();
+
+        if (ciudadanos != null)
+        {
+            datosRegistrosTendencia = GenerarDatosRegistrosTendencia(ciudadanos);
+        }
+    }
+
+    List<DatoRegistrosTendencia> GenerarDatosRegistrosTendencia(List<Ciudadano> ciudadanos)
+    {
+        var datos = new List<DatoRegistrosTendencia>();
+        var fechaActual = DateTime.Now;
+
+        for (int i = 11; i >= 0; i--)
+        {
+            var fechaMes = fechaActual.AddMonths(-i);
+            var inicioMes = new DateTime(fechaMes.Year, fechaMes.Month, 1);
+            var finMes = inicioMes.AddMonths(1).AddDays(-1);
+
+            var cantidadMes = ciudadanos.Count(c =>
+            c.FechaAlta >= inicioMes && c.FechaAlta <= finMes);
+
+            datos.Add(new DatoRegistrosTendencia
+                    {
+                        Mes = inicioMes.ToString("MMM yyyy"),
+                        Cantidad = cantidadMes
+                    });
+        }
+
+        return datos;
+    }
+
+    async Task CargarCooperacionesActivas()
+    {
+        try
+        {
+            var todasCooperaciones = await cooperacionManager.ObtenerTodos();
+
+            if (todasCooperaciones != null)
+            {
+                var fechaActual = DateTime.Now.Date;
+
+                // Filtrar cooperaciones activas
+                var cooperacionesActivas = todasCooperaciones
+                .Where(c => c.FechaDeInicio.Date <= fechaActual &&
+                           c.FechaLimiteDePago.Date >= fechaActual)
+                .ToList();
+
+                totalCooperacionesActivas = cooperacionesActivas.Count;
+                totalMontoActivo = cooperacionesActivas.Sum(c => c.Monto);
+
+                // Próximas a vencer (15 días para la tabla)
+                var fechaLimite = fechaActual.AddDays(15);
+                cooperacionesActivasProximas = cooperacionesActivas
+                .Where(c => c.FechaLimiteDePago.Date <= fechaLimite)
+                .OrderBy(c => c.FechaLimiteDePago)
+                .ToList();
+
+                // Próximas a vencer en 7 días para el contador
+                var fechaLimite7Dias = fechaActual.AddDays(7);
+                proximasAVencer = cooperacionesActivas.Count(c => c.FechaLimiteDePago.Date <= fechaLimite7Dias);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar cooperaciones activas: {ex.Message}");
+        }
+    }
+
+    async Task CargarResumen()
+    {
+        try
+        {
+            var cooperacionesPagadas = await cooperacionesDeCiudadanoManager.ObtenerTodos();
+            var gastos = await gastoManager.ObtenerTodos();
+            var cooperaciones = await cooperacionManager.ObtenerTodos();
+
+            if (cooperacionesPagadas != null && cooperaciones != null)
+            {
+                ingresosTotales = cooperacionesPagadas
+                .Where(cp => cp.FechaDePago.Year == añoSeleccionado)
+                .Sum(cp =>
+                {
+                    var coop = cooperaciones.FirstOrDefault(c => c.IdCooperacion == cp.IdCooperacion);
+                    return coop?.Monto ?? 0;
+                });
+            }
+
+            if (gastos != null)
+            {
+                gastosTotales = gastos
+                .Where(g => g.FechaGasto.Year == añoSeleccionado)
+                .Sum(g => g.Monto);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar resumen: {ex.Message}");
+        }
+    }
+
+    async Task EditarInfoDelegacion(InfoDelegacion infoDelegacion)
+    {
+        var result = await dialogService.OpenAsync(
+            infoDelegacion.IdInfoDelegacion == 0 ? "Agregar Información de Delegación" : "Editar Información de Delegación", 
+            ds =>
+            @<RadzenStack Gap="1.5rem">
+                <div class="row">
+                    <div class="col-4">Nombre</div>
+                    <div class="col-8"><RadzenTextBox @bind-Value="infoDelegacion.Nombre" class="w-100" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-4">Descripción</div>
+                    <div class="col-8"><RadzenTextArea @bind-Value="infoDelegacion.Descripcion" class="w-100" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-4">Dirección</div>
+                    <div class="col-8"><RadzenTextBox @bind-Value="infoDelegacion.Direccion" class="w-100" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-4">Teléfono</div>
+                    <div class="col-8"><RadzenTextBox @bind-Value="infoDelegacion.Telefono" class="w-100" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-4">Correo</div>
+                    <div class="col-8"><RadzenTextBox @bind-Value="infoDelegacion.Correo" class="w-100" /></div>
+                </div>
+                <div class="row">
+                    <div class="col-6"></div>
+                    <div class="col-3">
+                        <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" 
+                                    Click="(() => GuardarInfoDelegacion(infoDelegacion, ds))" />
+                    </div>
+                    <div class="col-3">
+                        <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" 
+                                    Click="(() => ds.Close(false))" />
+                    </div>
+                </div>
+            </RadzenStack>,
+            new DialogOptions()
+            {
+                Width = "600px",
+                Height = "410px",
+                Resizable = true,
+                Draggable = true
+            });
+
+        if (result == true)
+        {
+            await CargarInfoDelegacion();
+        }
+    }
+
+    async Task GuardarInfoDelegacion(InfoDelegacion infoDelegacion, DialogService ds)
     {
         InfoDelegacion resultado;
         if (infoDelegacion.IdInfoDelegacion == 0)
@@ -108,8 +695,8 @@
 
         if (resultado != null)
         {
-            dialogService.Close(true);
-            ActualizarTabla();
+            ds.Close(true);
+            await CargarInfoDelegacion();
         }
         else
         {
@@ -117,18 +704,73 @@
         }
     }
 
-    async Task Eliminar(InfoDelegacion infoDelegacion)
+    bool EsProximoAVencer(DateTime fechaLimite)
     {
-        var r = await dialogService.Confirm($"¿Realmente deseas eliminar la informacion '{infoDelegacion.Nombre}'?", "Advertencia",
-            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+        return (fechaLimite.Date - DateTime.Now.Date).Days <= 7;
+    }
 
-        if (r.Value)
+    async Task VerDetalle(Cooperacion cooperacion)
+    {
+        var diasRestantes = (cooperacion.FechaLimiteDePago.Date - DateTime.Now.Date).Days;
+
+        await dialogService.OpenAsync($"Detalle - {cooperacion.Nombre}", ds =>
+    @<RadzenStack Gap="1rem">
+        <RadzenFieldset Text="Información General">
+            <RadzenStack Gap="0.5rem">
+                <RadzenText><strong>Nombre:</strong> @cooperacion.Nombre</RadzenText>
+                <RadzenText><strong>Descripción:</strong> @cooperacion.Descripcion</RadzenText>
+                <RadzenText><strong>Monto:</strong> $@cooperacion.Monto.ToString("N2")</RadzenText>
+            </RadzenStack>
+        </RadzenFieldset>
+
+        <RadzenFieldset Text="Fechas">
+            <RadzenStack Gap="0.5rem">
+                <RadzenText><strong>Fecha de Inicio:</strong> @cooperacion.FechaDeInicio.ToString("dd/MM/yyyy")</RadzenText>
+                <RadzenText><strong>Fecha Límite:</strong> @cooperacion.FechaLimiteDePago.ToString("dd/MM/yyyy")</RadzenText>
+                <RadzenText>
+                    <strong>Días Restantes:</strong>
+                    <RadzenBadge BadgeStyle="@(diasRestantes <= 7 ? BadgeStyle.Danger : BadgeStyle.Success)"
+                                 Text="@diasRestantes.ToString()" />
+                </RadzenText>
+            </RadzenStack>
+        </RadzenFieldset>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Cerrar" ButtonStyle="ButtonStyle.Secondary" Click="(() => ds.Close())" />
+        </RadzenStack>
+    </RadzenStack>,
+        new DialogOptions()
         {
-            var eliminado = await infoDelegacionManager.Eliminar(infoDelegacion.IdInfoDelegacion.ToString());
-            if (eliminado)
-            {
-                ActualizarTabla();
-            }
-        }
+            Width = "500px",
+            Height = "400px",
+            Resizable = true,
+            Draggable = true
+        });
+    }
+
+    // Clases para los datos de gráficos
+    public class DatoCiudadanosPorSeccion
+    {
+        public string Seccion { get; set; }
+        public int Cantidad { get; set; }
+    }
+
+    public class DatoTipoUsuario
+    {
+        public string TipoUsuario { get; set; }
+        public int Cantidad { get; set; }
+    }
+
+    public class DatoIngresosVsGastos
+    {
+        public string Mes { get; set; }
+        public decimal Ingresos { get; set; }
+        public decimal Gastos { get; set; }
+    }
+
+    public class DatoRegistrosTendencia
+    {
+        public string Mes { get; set; }
+        public int Cantidad { get; set; }
     }
 }

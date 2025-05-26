@@ -1,0 +1,136 @@
+﻿@* @page "/catalogos/Configuracion" *@
+
+<h3>Configuracion</h3>
+
+<br />
+<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="@AgregarValidandoUnicoRegistro" />
+<br />
+<br />
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@infoDelegacions" TItem="InfoDelegacion">
+    <Columns>
+        <RadzenDataGridColumn Property="Nombre" Title="Nombre" Width="50" />
+        <RadzenDataGridColumn Property="Descripcion" Title="Descripcion" Width="50" />
+        <RadzenDataGridColumn Property="Direccion" Title="Direccion" Width="50" />
+        <RadzenDataGridColumn Property="Telefono" Title="Telefono" Width="50" />
+        <RadzenDataGridColumn Property="Correo" Title="Correo" Width="50" />
+        <RadzenDataGridColumn Title="Acciones">
+            <Template Context="data">
+                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
+                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    InfoDelegacionManager infoDelegacionManager;
+    List<InfoDelegacion> infoDelegacions;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        infoDelegacionManager = FabricManager.InfoDelegacionManager;
+        ActualizarTabla();
+    }
+
+    void ActualizarTabla()
+    {
+        infoDelegacions = infoDelegacionManager.ObtenerTodos().Result ?? new List<InfoDelegacion>();
+        InvokeAsync(StateHasChanged);
+    }
+
+    async Task AgregarValidandoUnicoRegistro()
+    {
+        // Validar si ya existe una fila en la tabla
+        if (infoDelegacions != null && infoDelegacions.Count > 0)
+        {
+            await dialogService.Alert("Solo se permite un registro en Informacion Delegacion. Elimine el existente para agregar uno nuevo.", "Registro único");
+            return;
+        }
+
+        // Si no existe ninguna fila, permite abrir el diálogo de edición
+        await Editar(new InfoDelegacion());
+    }
+
+    async Task Editar(InfoDelegacion infoDelegacion)
+    {
+        string titulo = infoDelegacion.IdInfoDelegacion == 0 ? "Nueva Informacion " : $"Editar {infoDelegacion.Nombre}";
+        var result = await dialogService.OpenAsync(titulo, ds =>
+
+    @<RadzenStack Gap="1.5rem">
+        <div class="row">
+            <div class="col-4">Nombre</div>
+            <div class="col-8"><RadzenTextBox @bind-Value="infoDelegacion.Nombre" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Descripcion</div>
+            <div class="col-8"><RadzenTextArea @bind-Value="infoDelegacion.Descripcion" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Direccion</div>
+            <div class="col-8"><RadzenTextBox @bind-Value="infoDelegacion.Direccion" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Telefono</div>
+            <div class="col-8"><RadzenTextBox @bind-Value="infoDelegacion.Telefono" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Correo</div>
+            <div class="col-8"><RadzenTextBox @bind-Value="infoDelegacion.Correo" class="w-100" /></div>
+        </div>
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="col-3"><RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(infoDelegacion))" /></div>
+            <div class="col-3"><RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" /></div>
+        </div>
+    </RadzenStack>
+
+    , new DialogOptions()
+    {
+        Draggable = true,
+        ShowClose = true,
+        Resizable = true,
+        Width = "600px",
+        Height = "410px"
+    });
+    }
+
+    async Task Guardar(InfoDelegacion infoDelegacion)
+    {
+        InfoDelegacion resultado;
+        if (infoDelegacion.IdInfoDelegacion == 0)
+        {
+            resultado = await infoDelegacionManager.Agregar(infoDelegacion);
+        }
+        else
+        {
+            resultado = await infoDelegacionManager.Modificar(infoDelegacion);
+        }
+
+        if (resultado != null)
+        {
+            dialogService.Close(true);
+            ActualizarTabla();
+        }
+        else
+        {
+            await dialogService.Alert(infoDelegacionManager.Error, "Error al guardar");
+        }
+    }
+
+    async Task Eliminar(InfoDelegacion infoDelegacion)
+    {
+        var r = await dialogService.Confirm($"¿Realmente deseas eliminar la informacion '{infoDelegacion.Nombre}'?", "Advertencia",
+            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+
+        if (r.Value)
+        {
+            var eliminado = await infoDelegacionManager.Eliminar(infoDelegacion.IdInfoDelegacion.ToString());
+            if (eliminado)
+            {
+                ActualizarTabla();
+            }
+        }
+    }
+}

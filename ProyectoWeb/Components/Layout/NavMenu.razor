@@ -1,90 +1,148 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿<!-- Menú superior -->
+<div class="top-row ps-3 navbar navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">ProyectoWeb</a>
+        <a class="navbar-brand" href="">Bienvenido</a>
     </div>
 </div>
 
+<!-- Botón de menú colapsable (para móviles o pantallas pequeñas) -->
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
+<!-- Menú lateral -->
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
-        @* <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
+        <!-- Inicio -->
+        <div class="menu-section">
+            <div class="menu-section-title">Inicio</div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/catalogos/Inicio">
+                    <img src="/imagenes/casa.png" alt="Inicio" style="width: 20px; height: 20px; margin-right: 8px;" /> Inicio
+                </NavLink>
+            </div>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
+        <!-- Gestión de Usuarios -->
+        <div class="menu-section">
+            <div class="menu-section-title">Gestión de Usuarios</div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/catalogos/TipoUsuario">
+                    <img src="/imagenes/usuario.png" alt="Cat. TipoUsuario" style="width: 20px; height: 20px; margin-right: 8px;" /> Cat. TipoUsuario
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/catalogos/seccion1">
+                    <img src="/imagenes/ubicacion.png" alt="Cat. Seccion" style="width: 20px; height: 20px; margin-right: 8px;" /> Cat. Seccion
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/catalogos/ciudadano1">
+                    <img src="/imagenes/ciudadano.png" alt="Cat. Ciudadanos" style="width: 20px; height: 20px; margin-right: 8px;" /> Cat. Ciudadanos
+                </NavLink>
+            </div>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
+        <!-- Documentación -->
+        <div class="menu-section">
+            <div class="menu-section-title">Documentación</div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/catalogos/Aviso">
+                    <img src="/imagenes/aviso.png" alt="Cat. Aviso" style="width: 20px; height: 20px; margin-right: 8px;" /> Cat. Aviso
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/catalogos/Documento">
+                    <img src="/imagenes/documento.png" alt="Cat. Documento" style="width: 20px; height: 20px; margin-right: 8px;" /> Cat. Documento
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/catalogos/DocumentoSolicitado">
+                    <img src="/imagenes/aprobado.png" alt="Documento Solicitado" style="width: 20px; height: 20px; margin-right: 8px;" /> Documento Solicitado
+                </NavLink>
+            </div>
+        </div>
+
+        <!-- Actividades -->
+        <div class="menu-section">
+            <div class="menu-section-title">Actividades</div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/catalogos/Cooperacion">
+                    <img src="/imagenes/cooperacion.png" alt="Cat Cooperacion" style="width: 20px; height: 20px; margin-right: 8px;" /> Cat Cooperacion
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/catalogos/CoperacionesDeCiudadano ">
+                    <img src="/imagenes/cooperar.png" alt="OperCiudadano" style="width: 20px; height: 20px; margin-right: 8px;" /> OperCiudadano
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/catalogos/Gasto ">
+                    <img src="/imagenes/depreciacion.png" alt="Gasto" style="width: 20px; height: 20px; margin-right: 8px;" /> Gasto
+                </NavLink>
+            </div>
+        </div>
+
+        <!-- Preferencias -->
+        @* <div class="menu-section">
+            <div class="menu-section-title">Configuracion</div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/catalogos/Configuracion">
+                    <span class="bi bi-gear" aria-hidden="true"></span> Ajustes
+                </NavLink>
+            </div>
         </div> *@
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/catalogos/Inicio">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Inicio
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/catalogos/TipoUsuario">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Cat. TipoUsuario
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/catalogos/seccion1">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Cat. Seccion
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/catalogos/ciudadano1">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Cat. Ciudadanos
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/catalogos/Aviso">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Cat. Aviso
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/catalogos/Documento">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Cat. Documento
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/catalogos/DocumentoSolicitado">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Documento Solicitado
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/catalogos/Cooperacion">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Cat Cooperacion
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/catalogos/CoperacionesDeCiudadano ">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> OperCiudadano
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/catalogos/Gasto ">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Gasto
-            </NavLink>
-        </div>
     </nav>
 </div>
 
+<!-- Estilos del menú -->
+<style>
+    .nav-scrollable {
+        background-color: #2c2f33;
+        height: 100vh;
+        overflow-y: auto;
+        padding-top: 1rem;
+    }
+
+    .nav-link {
+        color: #f8f9fa !important;
+        padding: 0.5rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .nav-link:hover {
+            background-color: #3c3f46;
+            color: #ffffff !important;
+            border-radius: 0.375rem;
+        }
+
+        .nav-link.active {
+            background-color: #007bff;
+            color: white !important;
+            border-radius: 0.375rem;
+        }
+
+    .menu-section-title {
+        font-weight: bold;
+        margin: 1rem 1rem 0.5rem;
+        color: #adb5bd;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+
+    .navbar-toggler {
+        display: none; /* Oculta si no usas colapsado en móvil */
+    }
+
+    .top-row {
+        background-color: #212529 !important;
+        color: white;
+    }
+</style>
