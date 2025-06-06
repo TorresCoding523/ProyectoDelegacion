@@ -1,108 +1,339 @@
 ﻿@page "/catalogos/Gasto"
 
-<h3>Catálogo Gasto</h3>
+<h3>Catálogo de Gastos - Sistema de Gestión</h3>
+<br />
 
-<br />
-<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new Gasto()))" />
-<br />
-<br />
-<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@gastos" TItem="Gasto">
-    <Columns>
-        <RadzenDataGridColumn Property="IdGasto" Title="ID" Width="50" />
-        <RadzenDataGridColumn Property="FechaGasto" Title="Fecha Gasto" Width="50" />
-        <RadzenDataGridColumn Property="Descripcion" Title="Descripcion" Width="50" />
-        <RadzenDataGridColumn Property="Monto" Title="Monto" Width="50" />
-        <RadzenDataGridColumn Property="IdUsuarioAutorizado" Title="Usuario Autorizado" Width="50" />
-        <RadzenDataGridColumn Title="Acciones">
-            <Template Context="data">
-                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
-                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
-            </Template>
-        </RadzenDataGridColumn>
-    </Columns>
-</RadzenDataGrid>
+<!-- Encabezado con estadísticas -->
+<RadzenRow Gap="1rem" class="rz-mb-4">
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="receipt" Style="font-size: 2rem; color: var(--rz-primary);" />
+                <RadzenText TextStyle="TextStyle.H6">Total Gastos</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-primary">
+                    @(gastos?.Count ?? 0)
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="attach_money" Style="font-size: 2rem; color: var(--rz-success);" />
+                <RadzenText TextStyle="TextStyle.H6">Monto Total</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-success">
+                    $@montoTotal.ToString("N2")
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="description" Style="font-size: 2rem; color: var(--rz-info);" />
+                <RadzenText TextStyle="TextStyle.H6">Con Descripción</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-info">
+                    @gastosConDescripcion
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+
+<!-- Controles de acción -->
+<RadzenCard class="rz-mb-3">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenText TextStyle="TextStyle.H6">
+            <RadzenIcon Icon="receipt" /> Gestión de Gastos
+        </RadzenText>
+        <RadzenButton Text="Agregar Gasto" Icon="add" ButtonStyle="ButtonStyle.Success"
+                      Click="(()=>Editar(new Gasto()))" />
+    </RadzenStack>
+</RadzenCard>
+
+<!-- Tabla de gastos -->
+<RadzenCard>
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-3">
+        <RadzenIcon Icon="list" /> Lista de Gastos
+    </RadzenText>
+
+    @if (gastos != null && gastos.Any())
+    {
+        <div style="overflow-x: auto; overflow-y: visible;">
+            <RadzenDataGrid @ref="grid" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true"
+                            FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                            Data="@gastos" TItem="Gasto" Style="border: none;">
+                <Columns>
+                    <RadzenDataGridColumn Property="IdGasto" Title="ID" Width="80px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@data.IdGasto.ToString()" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="FechaGasto" Title="Fecha" Width="120px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenStack Gap="0.25rem" AlignItems="AlignItems.Center">
+                                <RadzenIcon Icon="calendar_today" Style="font-size: 1rem; color: var(--rz-primary);" />
+                                <RadzenText TextStyle="TextStyle.Body2">
+                                    @data.FechaGasto.ToString("dd/MM/yyyy")
+                                </RadzenText>
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="Descripcion" Title="Descripción" Width="250px">
+                        <Template Context="data">
+                            @if (!string.IsNullOrEmpty(data.Descripcion))
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    @(data.Descripcion.Length > 80 ? data.Descripcion.Substring(0, 80) + "..." : data.Descripcion)
+                                </RadzenText>
+                            }
+                            else
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    <em>Sin descripción</em>
+                                </RadzenText>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="Monto" Title="Monto" Width="120px" TextAlign="TextAlign.Right">
+                        <Template Context="data">
+                            <RadzenStack Gap="0.25rem" AlignItems="AlignItems.End">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" Style="color: var(--rz-success);">
+                                    <RadzenIcon Icon="attach_money" Style="font-size: 1rem;" />
+                                    @data.Monto.ToString("N2")
+                                </RadzenText>
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="IdUsuarioAutorizado" Title="Usuario Autorizado" Width="180px">
+                        <Template Context="data">
+                            <RadzenStack Gap="0.25rem">
+                                <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-primary);">
+                                    <RadzenIcon Icon="person" Style="font-size: 1rem;" />
+                                    @ObtenerNombreUsuario(data.IdUsuarioAutorizado)
+                                </RadzenText>
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Click="(()=>VerDetalle(data))" ButtonStyle="ButtonStyle.Info"
+                                              Icon="visibility" Size="ButtonSize.Small" />
+                                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning"
+                                              Icon="edit" Size="ButtonSize.Small"
+                                              Tooltip="Editar gasto" />
+                                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger"
+                                              Icon="delete" Size="ButtonSize.Small"
+                                              Tooltip="Eliminar gasto" />
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    }
+    else if (gastos == null)
+    {
+        <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        <RadzenText TextStyle="TextStyle.Body2" class="rz-mt-2">Cargando gastos...</RadzenText>
+    }
+    else
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Info" Icon="info" Title="Sin gastos registrados">
+            No hay gastos registrados en el sistema.
+            <RadzenButton Text="Agregar Primer Gasto" Icon="add" ButtonStyle="ButtonStyle.Success"
+                          Click="(()=>Editar(new Gasto()))"
+                          Size="ButtonSize.Small" class="rz-mt-2" />
+        </RadzenAlert>
+    }
+</RadzenCard>
 
 @code {
+    RadzenDataGrid<Gasto> grid;
     GastoManager gastoManager;
     List<Gasto> gastos;
 
     CiudadanoManager ciudadanoManager;
     List<Ciudadano> ciudadanos;
 
-    protected override void OnInitialized()
+    // Variables para estadísticas
+    decimal montoTotal = 0;
+    int gastosConDescripcion = 0;
+
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
         gastoManager = FabricManager.GastoManager;
         ciudadanoManager = FabricManager.CiudadanoManager;
 
-        ciudadanos = ciudadanoManager.ObtenerTodos().Result;
-
-        ActualizarTabla();
+        ciudadanos = await ciudadanoManager.ObtenerTodos() ?? new List<Ciudadano>();
+        await ActualizarTabla();
     }
 
-    void ActualizarTabla()
+    async Task ActualizarTabla()
     {
-        gastos = gastoManager.ObtenerTodos().Result ?? new List<Gasto>();
-        InvokeAsync(StateHasChanged);
+        try
+        {
+            gastos = await gastoManager.ObtenerTodos() ?? new List<Gasto>();
+            CalcularEstadisticas();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar gastos: {ex.Message}");
+        }
+    }
+
+    void CalcularEstadisticas()
+    {
+        if (gastos != null)
+        {
+            montoTotal = gastos.Sum(g => g.Monto);
+            gastosConDescripcion = gastos.Count(g => !string.IsNullOrEmpty(g.Descripcion));
+        }
+    }
+
+    string ObtenerNombreUsuario(string idUsuario)
+    {
+        var usuario = ciudadanos?.FirstOrDefault(c => c.IdCiudadano == idUsuario);
+        return usuario?.Nombre ?? "Usuario no encontrado";
     }
 
     async Task Editar(Gasto gasto)
     {
-        string titulo = gasto.IdGasto == 0 ? "Nuevo Gasto" : $"Editar {gasto.IdGasto}";
+        string titulo = gasto.IdGasto == 0 ? "Nuevo Gasto" : $"Editar Gasto #{gasto.IdGasto}";
         var result = await dialogService.OpenAsync(titulo, ds =>
-
-    @<RadzenStack Gap="2.5rem">
+    @<RadzenStack Gap="1.5rem">
         <div class="row">
-            <div class="col-6">Fecha Gasto</div>
-            <div class="col-6">Descripcion</div>
+            <div class="col-4">Fecha del Gasto</div>
+            <div class="col-8"><RadzenDatePicker @bind-Value="gasto.FechaGasto" class="w-100" Placeholder="Seleccione la fecha" AllowClear="true" ShowTime="false" DateFormat="dd/MM/yyyy" /></div>
         </div>
         <div class="row">
-            <div class="col-6">
-                <RadzenDatePicker @bind-Value="gasto.FechaGasto" class="w-100" />
-            </div>
-            <div class="col-6">
-                <RadzenTextArea @bind-Value="gasto.Descripcion" class="w-100" />
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-6">Monto</div>
-            <div class="col-6">Usuario Autorizado</div>
+            <div class="col-4">Descripción</div>
+            <div class="col-8"><RadzenTextArea @bind-Value="gasto.Descripcion" class="w-100" Placeholder="Descripción del gasto" Rows="3" /></div>
         </div>
         <div class="row">
-            <div class="col-6">
-                <RadzenNumeric @bind-Value="gasto.Monto" class="w-100" />
-            </div>
-            <div class="col-6">
-                <RadzenDropDown @bind-Value="gasto.IdUsuarioAutorizado" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" />
+            <div class="col-4">Monto</div>
+            <div class="col-8"><RadzenNumeric @bind-Value="gasto.Monto" class="w-100" TValue="decimal" Format="c" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Usuario Autorizado</div>
+            <div class="col-8">
+                <RadzenDropDown @bind-Value="gasto.IdUsuarioAutorizado" Data="ciudadanos" TValue="string" 
+                               ValueProperty="IdCiudadano" class="w-100"
+                               Placeholder="Seleccione usuario autorizado" >
+                    <Template Context="ciudadano">
+                        @($"{ciudadano.Nombre} {ciudadano.Apellidos}")
+                    </Template>
+                </RadzenDropDown>
             </div>
         </div>
-
         <div class="row">
             <div class="col-6"></div>
             <div class="col-3">
-                <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(gasto))" />
+                <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary"
+                              Click="(() => Guardar(gasto, ds))" class="w-100" />
             </div>
             <div class="col-3">
-                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" />
+                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary"
+                              Click="(() => ds.Close(false))" class="w-100" />
             </div>
         </div>
-    </RadzenStack>
+    </RadzenStack>,
+    new DialogOptions()
+            {
+                Draggable = true,
+                ShowClose = true,
+                Resizable = true,
+                Width = "600px",
+                Height = "450px"
+            });
 
+        if (result == true)
+        {
+            await ActualizarTabla();
+        }
+    }
 
-    , new DialogOptions()
+    async Task VerDetalle(Gasto gasto)
     {
-        Draggable = true,
-        ShowClose = true,
+        await dialogService.OpenAsync($"Detalle - Gasto #{gasto.IdGasto}", ds =>
+    @<RadzenStack Gap="1rem">
+        <RadzenFieldset Text="Información del Gasto">
+            <RadzenRow Gap="1rem">
+                <!-- Columna Izquierda: Info básica -->
+                <RadzenColumn Size="4">
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenText><strong>Fecha:</strong></RadzenText>
+                        <RadzenText Style="margin-bottom: 1rem;">@gasto.FechaGasto.ToString("dd/MM/yyyy")</RadzenText>
+
+                        <RadzenText><strong>Monto:</strong></RadzenText>
+                        <RadzenText Style="margin-bottom: 1rem; color: var(--rz-success); font-weight: 600; font-size: 1.2rem;">
+                            $@gasto.Monto.ToString("N2")
+                        </RadzenText>
+
+                        <RadzenText><strong>Usuario Autorizado:</strong></RadzenText>
+                        <RadzenText>
+                            @($"{ciudadanos.FirstOrDefault(s => s.IdCiudadano == gasto.IdUsuarioAutorizado)?.Nombre} {ciudadanos.FirstOrDefault(s => s.IdCiudadano == gasto.IdUsuarioAutorizado)?.Apellidos}")
+                        </RadzenText>
+                    </RadzenStack>
+                </RadzenColumn>
+
+                <!-- Columna Derecha: Descripción -->
+                <RadzenColumn Size="8">
+                    <RadzenText><strong>Descripción:</strong></RadzenText>
+                    <RadzenCard Style="margin-top: 0.5rem; padding: 1rem; background-color: #f8f9fa; height: 200px; overflow-y: auto;">
+                        @if (!string.IsNullOrEmpty(gasto.Descripcion))
+                    {
+                        <RadzenText Style="white-space: pre-wrap; line-height: 1.5;">@gasto.Descripcion</RadzenText>
+                    }
+                    else
+                    {
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                            <RadzenIcon Icon="info" Style="color: #6c757d;" />
+                            <RadzenText Style="color: #6c757d; font-style: italic;">Sin descripción disponible</RadzenText>
+                        </RadzenStack>
+                    }
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenFieldset>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Cerrar" ButtonStyle="ButtonStyle.Secondary" Click="(() => ds.Close())" />
+        </RadzenStack>
+    </RadzenStack>,
+    new DialogOptions()
+    {
+        Width = "800px",
+        Height = "480px",
         Resizable = true,
-        Width = "600px",
-        Height = "500px"
+        Draggable = true
     });
     }
 
-    async Task Guardar(Gasto gasto)
+    async Task Guardar(Gasto gasto, DialogService ds)
     {
+        if (gasto.FechaGasto == DateTime.MinValue)
+        {
+            await dialogService.Alert("La fecha del gasto es obligatoria", "Validación");
+            return;
+        }
+
+        if (gasto.Monto <= 0)
+        {
+            await dialogService.Alert("El monto debe ser mayor a cero", "Validación");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(gasto.IdUsuarioAutorizado))
+        {
+            await dialogService.Alert("Debe seleccionar un usuario autorizado", "Validación");
+            return;
+        }
+
         Gasto resultado;
         if (gasto.IdGasto == 0)
         {
@@ -115,8 +346,8 @@
 
         if (resultado != null)
         {
-            dialogService.Close(true);
-            ActualizarTabla();
+            ds.Close(true);
+            await ActualizarTabla();
         }
         else
         {
@@ -126,15 +357,38 @@
 
     async Task Eliminar(Gasto gasto)
     {
-        var r = await dialogService.Confirm($"¿Realmente deseas eliminar el gasto '{gasto.IdGasto}'?", "Advertencia",
-            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+        var result = await dialogService.OpenAsync($"Confirmar eliminación", ds =>
+    @<RadzenStack Gap="1rem">
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Icon="warning" Title="¿Está seguro?">
+            Se eliminará permanentemente el gasto <strong>#@gasto.IdGasto</strong> por un monto de <strong>$@gasto.Monto.ToString("N2")</strong>.
+            <br />Esta acción no se puede deshacer.
+        </RadzenAlert>
 
-        if (r.Value)
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary"
+                          Click="(() => ds.Close(false))" />
+            <RadzenButton Text="Sí, eliminar" ButtonStyle="ButtonStyle.Danger"
+                          Click="(() => ds.Close(true))" />
+        </RadzenStack>
+    </RadzenStack>,
+        new DialogOptions()
+        {
+            Width = "500px",
+            Height = "300px",
+            Resizable = true,
+            Draggable = true
+        });
+
+        if (result == true)
         {
             var eliminado = await gastoManager.Eliminar(gasto.IdGasto.ToString());
             if (eliminado)
             {
-                ActualizarTabla();
+                await ActualizarTabla();
+            }
+            else
+            {
+                await dialogService.Alert(gastoManager.Error ?? "Error desconocido", "Error al eliminar");
             }
         }
     }

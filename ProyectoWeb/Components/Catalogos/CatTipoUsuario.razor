@@ -1,76 +1,275 @@
 ﻿@page "/catalogos/TipoUsuario"
 
-<h3>Catálogo de Tipo Usuario</h3>
+<h3>Catálogo de Tipos de Usuario - Sistema de Gestión</h3>
+<br />
 
-<br />
-<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new TipoUsuario()))" />
-<br />
-<br />
-<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@tipoUsuarios" TItem="TipoUsuario">
-    <Columns>
-        <RadzenDataGridColumn Property="IdTipoUsuario" Title="ID" Width="50" />
-        <RadzenDataGridColumn Property="Nombre" Title="Nombre" Width="50" />
-        <RadzenDataGridColumn Property="Notas" Title="Notas" Width="50" />
-        <RadzenDataGridColumn Title="Acciones">
-            <Template Context="data">
-                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
-                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
-            </Template>
-        </RadzenDataGridColumn>
-    </Columns>
-</RadzenDataGrid>
+<!-- Encabezado con estadísticas -->
+<RadzenRow Gap="1rem" class="rz-mb-4">
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="person" Style="font-size: 2rem; color: var(--rz-primary);" />
+                <RadzenText TextStyle="TextStyle.H6">Total Tipos</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-primary">
+                    @(tipoUsuarios?.Count ?? 0)
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="check_circle" Style="font-size: 2rem; color: var(--rz-success);" />
+                <RadzenText TextStyle="TextStyle.H6">Tipos Activos</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-success">
+                    @tiposActivos
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="note" Style="font-size: 2rem; color: var(--rz-info);" />
+                <RadzenText TextStyle="TextStyle.H6">Con Notas</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-info">
+                    @tiposConNotas
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+
+<!-- Controles de acción -->
+<RadzenCard class="rz-mb-3">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenText TextStyle="TextStyle.H6">
+            <RadzenIcon Icon="person" /> Gestión de Tipos de Usuario
+        </RadzenText>
+        <RadzenButton Text="Agregar Tipo Usuario" Icon="add" ButtonStyle="ButtonStyle.Success"
+                      Click="(()=>Editar(new TipoUsuario()))" />
+    </RadzenStack>
+</RadzenCard>
+
+<!-- Tabla de tipos de usuario -->
+<RadzenCard>
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-3">
+        <RadzenIcon Icon="list" /> Lista de Tipos de Usuario
+    </RadzenText>
+
+    @if (tipoUsuarios != null && tipoUsuarios.Any())
+    {
+        <div style="overflow-x: auto; overflow-y: visible;">
+            <RadzenDataGrid @ref="grid" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true"
+                            FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                            Data="@tipoUsuarios" TItem="TipoUsuario" Style="border: none;">
+                <Columns>
+                    <RadzenDataGridColumn Property="IdTipoUsuario" Title="ID" Width="80px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@data.IdTipoUsuario.ToString()" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="Nombre" Title="Nombre del Tipo" Width="200px">
+                        <Template Context="data">
+                            <RadzenStack Gap="0.25rem">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" Style="color: var(--rz-primary);">
+                                    <RadzenIcon Icon="person" Style="font-size: 1rem;" />
+                                    @data.Nombre
+                                </RadzenText>
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="Notas" Title="Descripción" Width="300px">
+                        <Template Context="data">
+                            @if (!string.IsNullOrEmpty(data.Notas))
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    @(data.Notas.Length > 100 ? data.Notas.Substring(0, 100) + "..." : data.Notas)
+                                </RadzenText>
+                            }
+                            else
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    <em>Sin descripción</em>
+                                </RadzenText>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Estado" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Activo" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Click="(()=>VerDetalle(data))" ButtonStyle="ButtonStyle.Info"
+                                              Icon="visibility" Size="ButtonSize.Small" />
+                                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning"
+                                              Icon="edit" Size="ButtonSize.Small"
+                                              Tooltip="Editar tipo de usuario" />
+                                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger"
+                                              Icon="delete" Size="ButtonSize.Small"
+                                              Tooltip="Eliminar tipo de usuario" />
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    }
+    else if (tipoUsuarios == null)
+    {
+        <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        <RadzenText TextStyle="TextStyle.Body2" class="rz-mt-2">Cargando tipos de usuario...</RadzenText>
+    }
+    else
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Info" Icon="info" Title="Sin tipos de usuario registrados">
+            No hay tipos de usuario registrados en el sistema.
+            <RadzenButton Text="Agregar Primer Tipo" Icon="add" ButtonStyle="ButtonStyle.Success"
+                          Click="(()=>Editar(new TipoUsuario()))"
+                          Size="ButtonSize.Small" class="rz-mt-2" />
+        </RadzenAlert>
+    }
+</RadzenCard>
 
 @code {
+    RadzenDataGrid<TipoUsuario> grid;
     TipoUsuarioManager tipoUsuarioManager;
     List<TipoUsuario> tipoUsuarios;
 
-    protected override void OnInitialized()
+    // Variables para estadísticas
+    int tiposActivos = 0;
+    int tiposConNotas = 0;
+
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
         tipoUsuarioManager = FabricManager.TipoUsuarioManager;
-        ActualizarTabla();
+        await ActualizarTabla();
     }
 
-    void ActualizarTabla()
+    async Task ActualizarTabla()
     {
-        tipoUsuarios = tipoUsuarioManager.ObtenerTodos().Result ?? new List<TipoUsuario>();
-        InvokeAsync(StateHasChanged);
+        try
+        {
+            tipoUsuarios = await tipoUsuarioManager.ObtenerTodos() ?? new List<TipoUsuario>();
+            CalcularEstadisticas();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar tipos de usuario: {ex.Message}");
+        }
+    }
+
+    void CalcularEstadisticas()
+    {
+        if (tipoUsuarios != null)
+        {
+            tiposActivos = tipoUsuarios.Count; // Todos están activos por defecto
+            tiposConNotas = tipoUsuarios.Count(t => !string.IsNullOrEmpty(t.Notas));
+        }
     }
 
     async Task Editar(TipoUsuario tipoUsuario)
     {
-        string titulo = tipoUsuario.IdTipoUsuario == 0 ? "Nuevo Tipo Usuario" : $"Editar {tipoUsuario.Nombre}";
+        string titulo = tipoUsuario.IdTipoUsuario == 0 ? "Nuevo Tipo de Usuario" : $"Editar {tipoUsuario.Nombre}";
         var result = await dialogService.OpenAsync(titulo, ds =>
-
     @<RadzenStack Gap="1.5rem">
         <div class="row">
             <div class="col-4">Nombre</div>
-            <div class="col-8"><RadzenTextBox @bind-Value="tipoUsuario.Nombre" class="w-100" /></div>
+            <div class="col-8"><RadzenTextBox @bind-Value="tipoUsuario.Nombre" class="w-100" Placeholder="Ingrese el nombre del tipo de usuario" /></div>
         </div>
         <div class="row">
-            <div class="col-4">Notas</div>
-            <div class="col-8"><RadzenTextArea @bind-Value="tipoUsuario.Notas" class="w-100" /></div>
+            <div class="col-4">Descripción</div>
+            <div class="col-8"><RadzenTextArea @bind-Value="tipoUsuario.Notas" class="w-100" Placeholder="Descripción opcional del tipo de usuario" Rows="3" /></div>
         </div>
         <div class="row">
             <div class="col-6"></div>
-            <div class="col-3"><RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(tipoUsuario))" /></div>
-            <div class="col-3"><RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" /></div>
+            <div class="col-3">
+                <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary"
+                              Click="(() => Guardar(tipoUsuario, ds))" class="w-100" />
+            </div>
+            <div class="col-3">
+                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary"
+                              Click="(() => ds.Close(false))" class="w-100" />
+            </div>
         </div>
-    </RadzenStack>
+    </RadzenStack>,
+    new DialogOptions()
+            {
+                Draggable = true,
+                ShowClose = true,
+                Resizable = true,
+                Width = "600px",
+                Height = "350px"
+            });
 
-    , new DialogOptions()
-    {
-        Draggable = true,
-        ShowClose = true,
-        Resizable = true,
-        Width = "600px",
-        Height = "350px"
-    });
+        if (result == true)
+        {
+            await ActualizarTabla();
+        }
     }
 
-    async Task Guardar(TipoUsuario tipoUsuario)
+    async Task VerDetalle(TipoUsuario tipoUsuario)
     {
+        await dialogService.OpenAsync($"Detalle - {tipoUsuario.Nombre}", ds =>
+    @<RadzenStack Gap="1rem">
+        <RadzenCard Style="padding: 1.5rem;">
+            <RadzenStack Gap="1rem">
+                <RadzenText TextStyle="TextStyle.H5" Style="color: #007bff; margin-bottom: 0.5rem;">
+                    <RadzenIcon Icon="account_circle" Style="margin-right: 0.5rem;" />
+                    @tipoUsuario.Nombre
+                </RadzenText>
+            
+                <RadzenDivider />
+            
+                <RadzenStack Gap="0.5rem">
+                    <RadzenText TextStyle="TextStyle.Subtitle2" Style="color: #495057;">
+                        <strong>Descripción:</strong>
+                    </RadzenText>
+                    <RadzenCard Style="padding: 1rem; background-color: #f8f9fa; border-left: 4px solid #28a745;">
+                        @if (!string.IsNullOrEmpty(tipoUsuario.Notas))
+                        {
+                            <RadzenText Style="white-space: pre-wrap; line-height: 1.6; color: #495057;">@tipoUsuario.Notas</RadzenText>
+                        }
+                        else
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                <RadzenIcon Icon="info" Style="color: #6c757d;" />
+                                <RadzenText Style="color: #6c757d; font-style: italic;">Sin descripción disponible</RadzenText>
+                            </RadzenStack>
+                        }
+                    </RadzenCard>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenCard>
+    
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Cerrar" ButtonStyle="ButtonStyle.Secondary" Click="(() => ds.Close())" />
+        </RadzenStack>
+    </RadzenStack>,
+    new DialogOptions()
+    {
+        Width = "650px",
+        Height = "380px",
+        Resizable = true,
+        Draggable = true
+    });
+}
+
+
+    async Task Guardar(TipoUsuario tipoUsuario, DialogService ds)
+    {
+        if (string.IsNullOrWhiteSpace(tipoUsuario.Nombre))
+        {
+            await dialogService.Alert("El nombre del tipo de usuario es obligatorio", "Validación");
+            return;
+        }
+
         TipoUsuario resultado;
         if (tipoUsuario.IdTipoUsuario == 0)
         {
@@ -83,8 +282,8 @@
 
         if (resultado != null)
         {
-            dialogService.Close(true);
-            ActualizarTabla();
+            ds.Close(true);
+            await ActualizarTabla();
         }
         else
         {
@@ -94,15 +293,38 @@
 
     async Task Eliminar(TipoUsuario tipoUsuario)
     {
-        var r = await dialogService.Confirm($"¿Realmente deseas eliminar al Tipo Usuario '{tipoUsuario.Nombre}'?", "Advertencia",
-            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+        var result = await dialogService.OpenAsync($"Confirmar eliminación", ds =>
+    @<RadzenStack Gap="1rem">
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Icon="warning" Title="¿Está seguro?">
+            Se eliminará permanentemente el tipo de usuario <strong>@tipoUsuario.Nombre</strong>.
+            <br />Esta acción no se puede deshacer.
+        </RadzenAlert>
 
-        if (r.Value)
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary"
+                          Click="(() => ds.Close(false))" />
+            <RadzenButton Text="Sí, eliminar" ButtonStyle="ButtonStyle.Danger"
+                          Click="(() => ds.Close(true))" />
+        </RadzenStack>
+    </RadzenStack>,
+        new DialogOptions()
+        {
+            Width = "500px",
+            Height = "300px",
+            Resizable = true,
+            Draggable = true
+        });
+
+        if (result == true)
         {
             var eliminado = await tipoUsuarioManager.Eliminar(tipoUsuario.IdTipoUsuario.ToString());
             if (eliminado)
             {
-                ActualizarTabla();
+                await ActualizarTabla();
+            }
+            else
+            {
+                await dialogService.Alert(tipoUsuarioManager.Error ?? "Error desconocido", "Error al eliminar");
             }
         }
     }

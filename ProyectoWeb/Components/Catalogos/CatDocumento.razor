@@ -1,86 +1,368 @@
 ﻿@page "/catalogos/Documento"
 
-<h3>Catálogo Documento</h3>
+<h3>Catálogo de Documentos - Sistema de Gestión</h3>
+<br />
 
-<br />
-<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new Documento()))" />
-<br />
-<br />
-<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@documentos" TItem="Documento">
-    <Columns>
-        <RadzenDataGridColumn Property="IdDocumento" Title="ID" Width="50" />
-        <RadzenDataGridColumn Property="Nombre" Title="Nombre" Width="50" />
-        <RadzenDataGridColumn Property="Costo" Title="Costo" Width="50" />
-        <RadzenDataGridColumn Property="URLPlantilla" Title="URLPlantilla" Width="50" />
-        <RadzenDataGridColumn Property="Notas" Title="Notas" Width="50" />
-        <RadzenDataGridColumn Title="Acciones">
-            <Template Context="data">
-                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
-                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
-            </Template>
-        </RadzenDataGridColumn>
-    </Columns>
-</RadzenDataGrid>
+<!-- Encabezado con estadísticas -->
+<RadzenRow Gap="1rem" class="rz-mb-4">
+    <RadzenColumn Size="3">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="description" Style="font-size: 2rem; color: var(--rz-primary);" />
+                <RadzenText TextStyle="TextStyle.H6">Total Documentos</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-primary">
+                    @(documentos?.Count ?? 0)
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="check_circle" Style="font-size: 2rem; color: var(--rz-success);" />
+                <RadzenText TextStyle="TextStyle.H6">Documentos Activos</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-success">
+                    @documentosActivos
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="attach_money" Style="font-size: 2rem; color: var(--rz-warning);" />
+                <RadzenText TextStyle="TextStyle.H6">Costo Promedio</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-warning">
+                    $@costoPromedio.ToString("N2")
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="note" Style="font-size: 2rem; color: var(--rz-info);" />
+                <RadzenText TextStyle="TextStyle.H6">Con Notas</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-info">
+                    @documentosConNotas
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+
+<!-- Controles de acción -->
+<RadzenCard class="rz-mb-3">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenText TextStyle="TextStyle.H6">
+            <RadzenIcon Icon="description" /> Gestión de Documentos
+        </RadzenText>
+        <RadzenButton Text="Agregar Documento" Icon="add" ButtonStyle="ButtonStyle.Success"
+                      Click="(()=>Editar(new Documento()))" />
+    </RadzenStack>
+</RadzenCard>
+
+<!-- Tabla de documentos -->
+<RadzenCard>
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-3">
+        <RadzenIcon Icon="list" /> Lista de Documentos
+    </RadzenText>
+
+    @if (documentos != null && documentos.Any())
+    {
+        <div style="overflow-x: auto; overflow-y: visible;">
+            <RadzenDataGrid @ref="grid" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true"
+                            FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                            Data="@documentos" TItem="Documento" Style="border: none;">
+                <Columns>
+                    <RadzenDataGridColumn Property="IdDocumento" Title="ID" Width="80px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@data.IdDocumento.ToString()" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="Nombre" Title="Nombre del Documento" Width="200px">
+                        <Template Context="data">
+                            <RadzenStack Gap="0.25rem">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" Style="color: var(--rz-primary);">
+                                    <RadzenIcon Icon="description" Style="font-size: 1rem;" />
+                                    @data.Nombre
+                                </RadzenText>
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="Costo" Title="Costo" Width="120px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="@($"${data.Costo:N2}")" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="URLPlantilla" Title="Plantilla" Width="150px">
+                        <Template Context="data">
+                            @if (!string.IsNullOrEmpty(data.URLPlantilla))
+                            {
+                                <RadzenStack Gap="0.25rem">
+                                    <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                        <RadzenIcon Icon="attach_file" Style="font-size: 1rem;" />
+                                        @data.URLPlantilla
+                                    </RadzenText>
+                                </RadzenStack>
+                            }
+                            else
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    <em>Sin plantilla</em>
+                                </RadzenText>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="Notas" Title="Notas" Width="250px">
+                        <Template Context="data">
+                            @if (!string.IsNullOrEmpty(data.Notas))
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    @(data.Notas.Length > 100 ? data.Notas.Substring(0, 100) + "..." : data.Notas)
+                                </RadzenText>
+                            }
+                            else
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    <em>Sin notas</em>
+                                </RadzenText>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Estado" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Activo" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Click="(()=>VerDetalle(data))" ButtonStyle="ButtonStyle.Info"
+                                              Icon="visibility" Size="ButtonSize.Small" />
+                                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning"
+                                              Icon="edit" Size="ButtonSize.Small"
+                                              Tooltip="Editar documento" />
+                                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger"
+                                              Icon="delete" Size="ButtonSize.Small"
+                                              Tooltip="Eliminar documento" />
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    }
+    else if (documentos == null)
+    {
+        <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        <RadzenText TextStyle="TextStyle.Body2" class="rz-mt-2">Cargando documentos...</RadzenText>
+    }
+    else
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Info" Icon="info" Title="Sin documentos registrados">
+            No hay documentos registrados en el sistema.
+            <RadzenButton Text="Agregar Primer Documento" Icon="add" ButtonStyle="ButtonStyle.Success"
+                          Click="(()=>Editar(new Documento()))"
+                          Size="ButtonSize.Small" class="rz-mt-2" />
+        </RadzenAlert>
+    }
+</RadzenCard>
 
 @code {
+    RadzenDataGrid<Documento> grid;
     DocumentoManager documentoManager;
     List<Documento> documentos;
 
-    protected override void OnInitialized()
+    // Variables para estadísticas
+    int documentosActivos = 0;
+    int documentosConNotas = 0;
+    decimal costoPromedio = 0;
+
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
         documentoManager = FabricManager.DocumentoManager;
-        ActualizarTabla();
+        await ActualizarTabla();
     }
 
-    void ActualizarTabla()
+    async Task ActualizarTabla()
     {
-        documentos = documentoManager.ObtenerTodos().Result ?? new List<Documento>();
-        InvokeAsync(StateHasChanged);
+        try
+        {
+            documentos = await documentoManager.ObtenerTodos() ?? new List<Documento>();
+            CalcularEstadisticas();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar documentos: {ex.Message}");
+        }
+    }
+
+    void CalcularEstadisticas()
+    {
+        if (documentos != null && documentos.Any())
+        {
+            documentosActivos = documentos.Count; // Todos están activos por defecto
+            documentosConNotas = documentos.Count(d => !string.IsNullOrEmpty(d.Notas));
+            costoPromedio = documentos.Average(d => d.Costo);
+        }
+        else
+        {
+            documentosActivos = 0;
+            documentosConNotas = 0;
+            costoPromedio = 0;
+        }
     }
 
     async Task Editar(Documento documento)
     {
         string titulo = documento.IdDocumento == 0 ? "Nuevo Documento" : $"Editar {documento.Nombre}";
         var result = await dialogService.OpenAsync(titulo, ds =>
-
     @<RadzenStack Gap="1.5rem">
         <div class="row">
             <div class="col-4">Nombre</div>
-            <div class="col-8"><RadzenTextBox @bind-Value="documento.Nombre" class="w-100" /></div>
+            <div class="col-8"><RadzenTextBox @bind-Value="documento.Nombre" class="w-100" Placeholder="Ingrese el nombre del documento" /></div>
         </div>
         <div class="row">
             <div class="col-4">Costo</div>
-            <div class="col-8"><RadzenNumeric @bind-Value="documento.Costo" class="w-100" /></div>
+            <div class="col-8"><RadzenNumeric @bind-Value="documento.Costo" class="w-100" Placeholder="0.00" TValue="decimal" Format="c" /></div>
         </div>
         <div class="row">
             <div class="col-4">URLPlantilla</div>
-            <div class="col-8"><RadzenTextBox @bind-Value="documento.URLPlantilla" class="w-100" /></div>
+            <div class="col-8">
+                <InputFile OnChange="@(e => OnFileSelected(e, documento))" class="form-control" />
+                @if (!string.IsNullOrEmpty(documento.URLPlantilla))
+            {
+                <div class="mt-2 alert alert-secondary p-2" role="alert">
+                    <i class="bi bi-file-earmark"></i> Archivo seleccionado: <strong>@documento.URLPlantilla</strong>
+                </div>
+            }
+            </div>
         </div>
         <div class="row">
             <div class="col-4">Notas</div>
-            <div class="col-8"><RadzenTextArea @bind-Value="documento.Notas" class="w-100" /></div>
+            <div class="col-8"><RadzenTextArea @bind-Value="documento.Notas" class="w-100" Placeholder="Notas opcionales del documento" Rows="3" /></div>
         </div>
         <div class="row">
             <div class="col-6"></div>
-            <div class="col-3"><RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(documento))" /></div>
-            <div class="col-3"><RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" /></div>
+            <div class="col-3">
+                <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary"
+                              Click="(() => Guardar(documento, ds))" class="w-100" />
+            </div>
+            <div class="col-3">
+                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary"
+                              Click="(() => ds.Close(false))" class="w-100" />
+            </div>
         </div>
-    </RadzenStack>
+    </RadzenStack>,
+        new DialogOptions()
+        {
+            Draggable = true,
+            ShowClose = true,
+            Resizable = true,
+            Width = "600px",
+            Height = "480px"
+        });
 
-    , new DialogOptions()
-    {
-        Draggable = true,
-        ShowClose = true,
-        Resizable = true,
-        Width = "600px",
-        Height = "410px"
-    });
+        if (result == true)
+        {
+            await ActualizarTabla();
+        }
     }
 
-    async Task Guardar(Documento documento)
+    async Task OnFileSelected(InputFileChangeEventArgs e, Documento documento)
     {
+        var file = e.File;
+        if (file != null)
+        {
+            // Aquí asignamos solo el nombre del archivo a la propiedad
+            documento.URLPlantilla = file.Name;
+
+            // Opcional: subir el archivo al servidor si es necesario
+            // using var stream = file.OpenReadStream();
+            // Procesar el archivo (guardar, convertir, etc.)
+        }
+    }
+
+    async Task VerDetalle(Documento documento)
+    {
+        await dialogService.OpenAsync($"Detalle - {documento.Nombre}", ds =>
+    @<RadzenStack Gap="1rem">
+        <RadzenFieldset Text="Información del Documento">
+            <!-- Información básica en fila horizontal -->
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="8">
+                    <RadzenText><strong>Nombre:</strong> @documento.Nombre</RadzenText>
+                </RadzenColumn>
+                <RadzenColumn Size="4">
+                    <RadzenText>
+                        <strong>Costo:</strong> 
+                        <span style="color: #28a745; font-weight: 500;">$@documento.Costo.ToString("N2")</span>
+                    </RadzenText>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <!-- URL de la plantilla en fila completa -->
+            <RadzenRow Gap="1rem" Style="margin-top: 1rem;">
+                <RadzenColumn Size="12">
+                    <RadzenText><strong>URL Plantilla:</strong></RadzenText>
+                    <RadzenCard Style="margin-top: 0.5rem; padding: 0.75rem; background-color: #f8f9fa;">
+                        @if (!string.IsNullOrEmpty(documento.URLPlantilla))
+                    {
+                        <RadzenLink Path="@documento.URLPlantilla" Target="_blank" Style="word-break: break-all;">
+                            @documento.URLPlantilla
+                        </RadzenLink>
+                    }
+                    else
+                    {
+                        <RadzenText Style="color: #6c757d; font-style: italic;">No disponible</RadzenText>
+                    }
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <!-- Notas en fila separada -->
+            <RadzenRow Gap="1rem" Style="margin-top: 1rem;">
+                <RadzenColumn Size="12">
+                    <RadzenText><strong>Notas:</strong></RadzenText>
+                    <RadzenCard Style="margin-top: 0.5rem; padding: 1rem; background-color: #f8f9fa; min-height: 80px;">
+                        @if (!string.IsNullOrEmpty(documento.Notas))
+                    {
+                        <RadzenText Style="white-space: pre-wrap; line-height: 1.5;">@documento.Notas</RadzenText>
+                    }
+                    else
+                    {
+                        <RadzenText Style="color: #6c757d; font-style: italic;">Sin notas adicionales</RadzenText>
+                    }
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenFieldset>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Cerrar" ButtonStyle="ButtonStyle.Secondary" Click="(() => ds.Close())" />
+        </RadzenStack>
+    </RadzenStack>,
+        new DialogOptions()
+        {
+            Width = "700px",
+            Height = "480px",
+            Resizable = true,
+            Draggable = true
+        });
+    }
+
+    async Task Guardar(Documento documento, DialogService ds)
+    {
+        if (string.IsNullOrWhiteSpace(documento.Nombre))
+        {
+            await dialogService.Alert("El nombre del documento es obligatorio", "Validación");
+            return;
+        }
+
         Documento resultado;
         if (documento.IdDocumento == 0)
         {
@@ -93,8 +375,8 @@
 
         if (resultado != null)
         {
-            dialogService.Close(true);
-            ActualizarTabla();
+            ds.Close(true);
+            await ActualizarTabla();
         }
         else
         {
@@ -104,15 +386,38 @@
 
     async Task Eliminar(Documento documento)
     {
-        var r = await dialogService.Confirm($"¿Realmente deseas eliminar el documento '{documento.Nombre}'?", "Advertencia",
-            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+        var result = await dialogService.OpenAsync($"Confirmar eliminación", ds =>
+    @<RadzenStack Gap="1rem">
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Icon="warning" Title="¿Está seguro?">
+            Se eliminará permanentemente el documento <strong>@documento.Nombre</strong>.
+            <br />Esta acción no se puede deshacer.
+        </RadzenAlert>
 
-        if (r.Value)
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary"
+                          Click="(() => ds.Close(false))" />
+            <RadzenButton Text="Sí, eliminar" ButtonStyle="ButtonStyle.Danger"
+                          Click="(() => ds.Close(true))" />
+        </RadzenStack>
+    </RadzenStack>,
+        new DialogOptions()
+        {
+            Width = "500px",
+            Height = "300px",
+            Resizable = true,
+            Draggable = true
+        });
+
+        if (result == true)
         {
             var eliminado = await documentoManager.Eliminar(documento.IdDocumento.ToString());
             if (eliminado)
             {
-                ActualizarTabla();
+                await ActualizarTabla();
+            }
+            else
+            {
+                await dialogService.Alert(documentoManager.Error ?? "Error desconocido", "Error al eliminar");
             }
         }
     }

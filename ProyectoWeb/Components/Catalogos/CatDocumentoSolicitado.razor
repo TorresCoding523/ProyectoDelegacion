@@ -1,30 +1,170 @@
 ﻿@page "/catalogos/DocumentoSolicitado"
 
-<h3>Catálogo Documento Solicitado</h3>
+<h3>Catálogo de Documentos Solicitados - Sistema de Gestión</h3>
+<br />
 
-<br />
-<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new DocumentoSolicitado()))" />
-<br />
-<br />
-<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-Data="@documentoSolicitados" TItem="DocumentoSolicitado">
-    <Columns>
-        <RadzenDataGridColumn Property="FechaSolicitud" Title="Fecha de Solicitud" Width="50" />
-        <RadzenDataGridColumn Property="FechaEntrega" Title="Fecha de Entrega" Width="50" />
-        <RadzenDataGridColumn Property="FechaPago" Title="Fecha de Pago" Width="50" />
-        <RadzenDataGridColumn Property="MontoPagado" Title="Monto Pagado" Width="50" />
-        <RadzenDataGridColumn Property="Finalidad" Title="Finalidad" Width="50" />
-        <RadzenDataGridColumn Property="Notas" Title="Notas"  Width="50"   />
-        <RadzenDataGridColumn Title="Acciones">
-            <Template Context="data">
-                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
-                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
-            </Template>
-        </RadzenDataGridColumn>
-    </Columns>
-</RadzenDataGrid>
+<!-- Encabezado con estadísticas -->
+<RadzenRow Gap="1rem" class="rz-mb-4">
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="description" Style="font-size: 2rem; color: var(--rz-primary);" />
+                <RadzenText TextStyle="TextStyle.H6">Total Solicitudes</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-primary">
+                    @(documentoSolicitados?.Count ?? 0)
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="check_circle" Style="font-size: 2rem; color: var(--rz-success);" />
+                <RadzenText TextStyle="TextStyle.H6">Entregados</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-success">
+                    @documentosEntregados
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="payments" Style="font-size: 2rem; color: var(--rz-info);" />
+                <RadzenText TextStyle="TextStyle.H6">Total Ingresos</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-info">
+                    $@totalIngresos.ToString("N2")
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+
+<!-- Controles de acción -->
+<RadzenCard class="rz-mb-3">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenText TextStyle="TextStyle.H6">
+            <RadzenIcon Icon="description" /> Gestión de Documentos Solicitados
+        </RadzenText>
+        <RadzenButton Text="Agregar Solicitud" Icon="add" ButtonStyle="ButtonStyle.Success"
+                      Click="(()=>Editar(new DocumentoSolicitado()))" />
+    </RadzenStack>
+</RadzenCard>
+
+<!-- Tabla de documentos solicitados -->
+<RadzenCard>
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-3">
+        <RadzenIcon Icon="list" /> Lista de Documentos Solicitados
+    </RadzenText>
+
+    @if (documentoSolicitados != null && documentoSolicitados.Any())
+    {
+        <div style="overflow-x: auto; overflow-y: visible;">
+            <RadzenDataGrid @ref="grid" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true"
+                            FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                            Data="@documentoSolicitados" TItem="DocumentoSolicitado" Style="border: none;">
+                <Columns>
+                    <RadzenDataGridColumn Property="IdDocumentoSolicitado" Title="ID" Width="80px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@data.IdDocumentoSolicitado.ToString()" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Solicitante" Width="200px">
+                        <Template Context="data">
+                            @{
+                                var ciudadano = ciudadanos?.FirstOrDefault(c => c.IdCiudadano == data.IdCiudadanoSolicitante);
+                            }
+                            <RadzenStack Gap="0.25rem">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" Style="color: var(--rz-primary);">
+                                    <RadzenIcon Icon="person" Style="font-size: 1rem;" />
+                                    @($"{ciudadano?.Nombre} {ciudadano?.Apellidos}" ?? "N/A")
+                                </RadzenText>
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Documento" Width="180px">
+                        <Template Context="data">
+                            @{
+                                var documento = documentos?.FirstOrDefault(d => d.IdDocumento == data.IdDocumento);
+                            }
+                            <RadzenStack Gap="0.25rem">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" Style="color: var(--rz-secondary);">
+                                    <RadzenIcon Icon="description" Style="font-size: 1rem;" />
+                                    @(documento?.Nombre ?? "N/A")
+                                </RadzenText>
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="MontoPagado" Title="Monto" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="@($"${data.MontoPagado:N2}")" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="Finalidad" Title="Finalidad" Width="150px">
+                        <Template Context="data">
+                            @if (!string.IsNullOrEmpty(data.Finalidad))
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    @(data.Finalidad.Length > 50 ? data.Finalidad.Substring(0, 50) + "..." : data.Finalidad)
+                                </RadzenText>
+                            }
+                            else
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    <em>Sin finalidad</em>
+                                </RadzenText>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Estado" Width="100px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            @if (data.FechaEntrega.HasValue)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Entregado" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Warning" Text="Pendiente" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Click="(()=>VerDetalle(data))" ButtonStyle="ButtonStyle.Info"
+                                              Icon="visibility" Size="ButtonSize.Small" />
+                                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning"
+                                              Icon="edit" Size="ButtonSize.Small"
+                                              Tooltip="Editar documento solicitado" />
+                                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger"
+                                              Icon="delete" Size="ButtonSize.Small"
+                                              Tooltip="Eliminar documento solicitado" />
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    }
+    else if (documentoSolicitados == null)
+    {
+        <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        <RadzenText TextStyle="TextStyle.Body2" class="rz-mt-2">Cargando documentos solicitados...</RadzenText>
+    }
+    else
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Info" Icon="info" Title="Sin documentos solicitados registrados">
+            No hay documentos solicitados registrados en el sistema.
+            <RadzenButton Text="Agregar Primer Documento" Icon="add" ButtonStyle="ButtonStyle.Success"
+                          Click="(()=>Editar(new DocumentoSolicitado()))"
+                          Size="ButtonSize.Small" class="rz-mt-2" />
+        </RadzenAlert>
+    }
+</RadzenCard>
 
 @code {
+    RadzenDataGrid<DocumentoSolicitado> grid;
     DocumentoSolicitadoManager documentoSolicitadoManager;
     List<DocumentoSolicitado> documentoSolicitados;
 
@@ -34,49 +174,94 @@ Data="@documentoSolicitados" TItem="DocumentoSolicitado">
     CiudadanoManager ciudadanoManager;
     List<Ciudadano> ciudadanos;
     decimal costo;
-    protected override void OnInitialized()
+
+    // Variables para estadísticas
+    int documentosEntregados = 0;
+    decimal totalIngresos = 0;
+
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
 
         documentoSolicitadoManager = FabricManager.DocumentoSolicitadoManager;
         documentoManager = FabricManager.DocumentoManager;
         ciudadanoManager = FabricManager.CiudadanoManager;
 
-        documentos = documentoManager.ObtenerTodos().Result;
-        ciudadanos = ciudadanoManager.ObtenerTodos().Result;
+        documentos = await documentoManager.ObtenerTodos() ?? new List<Documento>();
+        ciudadanos = await ciudadanoManager.ObtenerTodos() ?? new List<Ciudadano>();
 
-        ActualizarTabla();
+        await ActualizarTabla();
     }
 
-    void ActualizarTabla()
+    async Task ActualizarTabla()
     {
-        documentoSolicitados = documentoSolicitadoManager.ObtenerTodos().Result ?? new List<DocumentoSolicitado>();
-        InvokeAsync(StateHasChanged);
+        try
+        {
+            documentoSolicitados = await documentoSolicitadoManager.ObtenerTodos() ?? new List<DocumentoSolicitado>();
+            CalcularEstadisticas();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar documentos solicitados: {ex.Message}");
+        }
+    }
+
+    void CalcularEstadisticas()
+    {
+        if (documentoSolicitados != null)
+        {
+            documentosEntregados = documentoSolicitados.Count(d => d.FechaEntrega.HasValue);
+            totalIngresos = documentoSolicitados.Sum(d => d.MontoPagado);
+        }
     }
 
     async Task Editar(DocumentoSolicitado documentoSolicitado)
     {
-        string titulo = documentoSolicitado.IdDocumentoSolicitado == 0 ? "Nuevo Documento Solicitado" : $"Editar {documentoSolicitado.IdDocumentoSolicitado}";
+        string titulo = documentoSolicitado.IdDocumentoSolicitado == 0 ? "Nueva Solicitud de Documento" : $"Editar Solicitud #{documentoSolicitado.IdDocumentoSolicitado}";
         var result = await dialogService.OpenAsync(titulo, ds =>
-
     @<RadzenStack Gap="1.5rem">
         <div class="row">
-            <div class="col-6">Documento</div>
-            <div class="col-6">Ciudadano Solicitante</div>
+            <div class="col-4">Documento</div>
+            <div class="col-8"><RadzenDropDown @bind-Value="documentoSolicitado.IdDocumento" Data="documentos" TValue="int" ValueProperty="IdDocumento" TextProperty="Nombre" Change="(args=>seleccionAsync(args,documentoSolicitado))" class="w-100" Placeholder="Seleccione un documento" /></div>
         </div>
         <div class="row">
-            <div class="col-6"><RadzenDropDown @bind-Value="documentoSolicitado.IdDocumento" Data="documentos" TValue="int" ValueProperty="IdDocumento" TextProperty="Nombre" Change="(args=>seleccionAsync(args,documentoSolicitado))" /></div>
-            <div class="col-6"><RadzenDropDown @bind-Value="documentoSolicitado.IdCiudadanoSolicitante" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" /></div>
+            <div class="col-4">Ciudadano Solicitante</div>
+            <div class="col-8">
+                <RadzenDropDown @bind-Value="documentoSolicitado.IdCiudadanoSolicitante"
+                                Data="ciudadanos"
+                                TValue="string"
+                                ValueProperty="IdCiudadano"
+                                class="w-100"
+                                Placeholder="Seleccione un ciudadano">
+
+                    <Template Context="ciudadano">
+                        @($"{ciudadano.Nombre} {ciudadano.Apellidos}")
+                    </Template>
+                </RadzenDropDown>
+            </div>
         </div>
         <div class="row">
-            <div class="col-6">Fecha Solicitud</div>
-            <div class="col-3">Fecha Entrega</div>
-            <div class="col-3">Usuario Generador</div>
+            <div class="col-4">Fecha Solicitud</div>
+            <div class="col-4">Fecha Entrega</div>
+            <div class="col-4">Usuario Generador</div>
         </div>
         <div class="row">
-            <div class="col-6"><RadzenDatePicker @bind-Value="documentoSolicitado.FechaSolicitud" class="w-100" /></div>
-            <div class="col-3"><RadzenDatePicker @bind-Value="documentoSolicitado.FechaEntrega" class="w-100" /></div>
-            <div class="col-3"><RadzenDropDown @bind-Value="documentoSolicitado.IdUsuarioGenerador" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" /></div>
+            <div class="col-4"><RadzenDatePicker @bind-Value="documentoSolicitado.FechaSolicitud" class="w-100" Placeholder="Seleccione la fecha" AllowClear="true" ShowTime="false" DateFormat="dd/MM/yyyy" /></div>
+            <div class="col-4"><RadzenDatePicker @bind-Value="documentoSolicitado.FechaEntrega" class="w-100" Placeholder="Seleccione la fecha" AllowClear="true" ShowTime="false" DateFormat="dd/MM/yyyy" /></div>
+            <div class="col-4">
+                <RadzenDropDown @bind-Value="documentoSolicitado.IdUsuarioGenerador"
+                                Data="ciudadanos"
+                                TValue="string"
+                                ValueProperty="IdCiudadano"
+                                class="w-100"
+                                Placeholder="Seleccione un ciudadano">
+
+                    <Template Context="ciudadano">
+                        @($"{ciudadano.Nombre} {ciudadano.Apellidos}")
+                    </Template>
+                </RadzenDropDown>
+            </div>
         </div>
         <div class="row">
             <div class="col-4">Fecha Pago</div>
@@ -84,40 +269,72 @@ Data="@documentoSolicitados" TItem="DocumentoSolicitado">
             <div class="col-4">Usuario Que Entrega</div>
         </div>
         <div class="row">
-            <div class="col-4"><RadzenDatePicker @bind-Value="documentoSolicitado.FechaPago" class="w-100" /></div>
+            <div class="col-4"><RadzenDatePicker @bind-Value="documentoSolicitado.FechaPago" class="w-100" Placeholder="Seleccione la fecha" AllowClear="true" ShowTime="false" DateFormat="dd/MM/yyyy" /></div>
+            <div class="col-4"><RadzenNumeric @bind-Value="documentoSolicitado.MontoPagado" TValue="decimal" class="w-100" Format="c" /></div>
             <div class="col-4">
-                <RadzenNumeric @bind-Value="documentoSolicitado.MontoPagado" TValue="decimal" Style="width: 100%;" />
+                <RadzenDropDown @bind-Value="documentoSolicitado.IdUsuarioQueEntrega"
+                                Data="ciudadanos"
+                                TValue="string"
+                                ValueProperty="IdCiudadano"
+                                class="w-100"
+                                Placeholder="Seleccione un ciudadano">
+
+                    <Template Context="ciudadano">
+                        @($"{ciudadano.Nombre} {ciudadano.Apellidos}")
+                    </Template>
+                </RadzenDropDown>
             </div>
-            <div class="col-4"><RadzenDropDown @bind-Value="documentoSolicitado.IdUsuarioQueEntrega" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" /></div>
         </div>
         <div class="row">
-            <div class="col-6">Finalidad</div>
-            <div class="col-6">Notas</div>
+            <div class="col-4">Finalidad</div>
+            <div class="col-8">Notas</div>
         </div>
         <div class="row">
-            <div class="col-6">
-                <RadzenTextBox @bind-Value="documentoSolicitado.Finalidad" class="w-100" />
-            </div>
-            <div class="col-6">
-                <RadzenTextArea @bind-Value="documentoSolicitado.Notas" class="w-100" />
-            </div>
+            <div class="col-4"><RadzenTextBox @bind-Value="documentoSolicitado.Finalidad" class="w-100" Placeholder="Finalidad del documento" /></div>
+            <div class="col-8"><RadzenTextArea @bind-Value="documentoSolicitado.Notas" class="w-100" Placeholder="Notas adicionales" Rows="2" /></div>
         </div>
         <div class="row">
             <div class="col-6"></div>
-            <div class="col-3"><RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(documentoSolicitado))" /></div>
-            <div class="col-3"><RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" /></div>
+            <div class="col-3">
+                <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary"
+                              Click="(() => Guardar(documentoSolicitado, ds))" class="w-100" />
+            </div>
+            <div class="col-3">
+                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary"
+                              Click="(() => ds.Close(false))" class="w-100" />
+            </div>
         </div>
-    </RadzenStack>
+    </RadzenStack>,
+    new DialogOptions()
+            {
+                Draggable = true,
+                ShowClose = true,
+                Resizable = true,
+                Width = "800px",
+                Height = "650px"
+            });
 
-    , new DialogOptions()
-    {
-        Draggable = true,
-        ShowClose = true,
-        Resizable = true,
-        Width = "700px",
-        Height = "600px"
-    });
+        if (result == true)
+        {
+            await ActualizarTabla();
+        }
     }
+
+    // public async Task seleccionAsync(object value, DocumentoSolicitado documentoSolicitado)
+    // {
+    //     if (value is int id)
+    //     {
+    //         Documento documento = await FabricManager.DocumentoManager.ObtenerPorId(id.ToString());
+    //         if (documento != null)
+    //         {
+    //             costo = documento.Costo;
+    //             documentoSolicitado.MontoPagado = costo;
+    //             // Refresh the dialog
+    //             StateHasChanged();
+    //         }
+    //     }
+    // }
+
     public async Task seleccionAsync(object value, DocumentoSolicitado documentoSolicitado)
     {
         if (value is int id)
@@ -126,12 +343,131 @@ Data="@documentoSolicitados" TItem="DocumentoSolicitado">
             costo = documento.Costo;
             documentoSolicitado.MontoPagado = costo;
             dialogService.Close(false);
-            Editar( documentoSolicitado);
+            Editar(documentoSolicitado);
         }
     }
 
-    async Task Guardar(DocumentoSolicitado documentoSolicitado)
+    async Task VerDetalle(DocumentoSolicitado documentoSolicitado)
     {
+        var ciudadanoSolicitante = ciudadanos.FirstOrDefault(s => s.IdCiudadano == documentoSolicitado.IdCiudadanoSolicitante);
+        var usuarioGenerador = ciudadanos.FirstOrDefault(s => s.IdCiudadano == documentoSolicitado.IdUsuarioGenerador); // Corregir el campo
+        var usuarioQueEntrega = ciudadanos.FirstOrDefault(s => s.IdCiudadano == documentoSolicitado.IdUsuarioQueEntrega); // Corregir el campo
+        var documento = documentos.FirstOrDefault(s => s.IdDocumento == documentoSolicitado.IdDocumento);
+
+        await dialogService.OpenAsync($"Solicitud #{documentoSolicitado.IdDocumentoSolicitado} - {documento?.Nombre}", ds =>
+    @<RadzenStack Gap="1rem">
+        <RadzenRow Gap="1rem">
+            <!-- Información del Documento y Solicitante -->
+            <RadzenColumn Size="6">
+                <RadzenFieldset Text="Información de la Solicitud">
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenText><strong>Documento:</strong> @documento?.Nombre</RadzenText>
+                        <RadzenText>
+                            <strong>Solicitante:</strong>
+                            @($"{ciudadanoSolicitante?.Nombre} {ciudadanoSolicitante?.Apellidos}")
+                        </RadzenText>
+                        <RadzenText>
+                            <strong>Fecha Solicitud:</strong>
+                            @documentoSolicitado.FechaSolicitud.ToString("dd/MM/yyyy")
+                        </RadzenText>
+                        <RadzenText>
+                            <strong>Fecha Entrega:</strong>
+                            @(documentoSolicitado.FechaEntrega?.ToString("dd/MM/yyyy") ?? "Pendiente")
+                        </RadzenText>
+                    </RadzenStack>
+                </RadzenFieldset>
+            </RadzenColumn>
+
+            <!-- Información de Pago -->
+            <RadzenColumn Size="6">
+                <RadzenFieldset Text="Información de Pago">
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenText>
+                            <strong>Fecha Pago:</strong>
+                            @(documentoSolicitado.FechaPago?.ToString("dd/MM/yyyy") ?? "Sin pagar")
+                        </RadzenText>
+                        <RadzenText>
+                            <strong>Monto Pagado:</strong>
+                            <span style="color: #28a745; font-weight: 500;">
+                                $@documentoSolicitado.MontoPagado.ToString("N2")
+                            </span>
+                        </RadzenText>
+                        <RadzenText>
+                            <strong>Usuario Generador:</strong>
+                            @($"{usuarioGenerador?.Nombre} {usuarioGenerador?.Apellidos}")
+                        </RadzenText>
+                        <RadzenText>
+                            <strong>Usuario Que Entrega:</strong>
+                            @($"{usuarioQueEntrega?.Nombre} {usuarioQueEntrega?.Apellidos}")
+                        </RadzenText>
+                    </RadzenStack>
+                </RadzenFieldset>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <!-- Finalidad en fila completa -->
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12">
+                <RadzenFieldset Text="Finalidad">
+                    <RadzenCard Style="padding: 1rem; background-color: #f8f9fa;">
+                        @if (!string.IsNullOrEmpty(documentoSolicitado.Finalidad))
+                    {
+                        <RadzenText Style="white-space: pre-wrap; line-height: 1.5;">@documentoSolicitado.Finalidad</RadzenText>
+                    }
+                    else
+                    {
+                        <RadzenText Style="color: #6c757d; font-style: italic;">Sin finalidad especificada</RadzenText>
+                    }
+                    </RadzenCard>
+                </RadzenFieldset>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <!-- Notas en fila completa -->
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12">
+                <RadzenFieldset Text="Notas Adicionales">
+                    <RadzenCard Style="padding: 1rem; background-color: #f8f9fa;">
+                        @if (!string.IsNullOrEmpty(documentoSolicitado.Notas))
+                    {
+                        <RadzenText Style="white-space: pre-wrap; line-height: 1.5;">@documentoSolicitado.Notas</RadzenText>
+                    }
+                    else
+                    {
+                        <RadzenText Style="color: #6c757d; font-style: italic;">Sin notas adicionales</RadzenText>
+                    }
+                    </RadzenCard>
+                </RadzenFieldset>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Cerrar" ButtonStyle="ButtonStyle.Secondary" Click="(() => ds.Close())" />
+        </RadzenStack>
+    </RadzenStack>,
+        new DialogOptions()
+        {
+            Width = "900px",
+            Height = "630px",
+            Resizable = true,
+            Draggable = true
+        });
+    }
+
+    async Task Guardar(DocumentoSolicitado documentoSolicitado, DialogService ds)
+    {
+        if (documentoSolicitado.IdDocumento == 0)
+        {
+            await dialogService.Alert("Debe seleccionar un documento", "Validación");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(documentoSolicitado.IdCiudadanoSolicitante))
+        {
+            await dialogService.Alert("Debe seleccionar un ciudadano solicitante", "Validación");
+            return;
+        }
+
         DocumentoSolicitado resultado;
         if (documentoSolicitado.IdDocumentoSolicitado == 0)
         {
@@ -144,8 +480,8 @@ Data="@documentoSolicitados" TItem="DocumentoSolicitado">
 
         if (resultado != null)
         {
-            dialogService.Close(true);
-            ActualizarTabla();
+            ds.Close(true);
+            await ActualizarTabla();
         }
         else
         {
@@ -155,15 +491,38 @@ Data="@documentoSolicitados" TItem="DocumentoSolicitado">
 
     async Task Eliminar(DocumentoSolicitado documentoSolicitado)
     {
-        var r = await dialogService.Confirm($"¿Realmente deseas eliminar el documento solicitado '{documentoSolicitado.IdDocumentoSolicitado}'?", "Advertencia",
-            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+        var result = await dialogService.OpenAsync($"Confirmar eliminación", ds =>
+    @<RadzenStack Gap="1rem">
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Icon="warning" Title="¿Está seguro?">
+            Se eliminará permanentemente la solicitud de documento <strong>#@documentoSolicitado.IdDocumentoSolicitado</strong>.
+            <br />Esta acción no se puede deshacer.
+        </RadzenAlert>
 
-        if (r.Value)
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary"
+                          Click="(() => ds.Close(false))" />
+            <RadzenButton Text="Sí, eliminar" ButtonStyle="ButtonStyle.Danger"
+                          Click="(() => ds.Close(true))" />
+        </RadzenStack>
+    </RadzenStack>,
+        new DialogOptions()
         {
-            var eliminado = await documentoManager.Eliminar(documentoSolicitado.IdDocumentoSolicitado.ToString());
+            Width = "500px",
+            Height = "300px",
+            Resizable = true,
+            Draggable = true
+        });
+
+        if (result == true)
+        {
+            var eliminado = await documentoSolicitadoManager.Eliminar(documentoSolicitado.IdDocumentoSolicitado.ToString());
             if (eliminado)
             {
-                ActualizarTabla();
+                await ActualizarTabla();
+            }
+            else
+            {
+                await dialogService.Alert(documentoSolicitadoManager.Error ?? "Error desconocido", "Error al eliminar");
             }
         }
     }

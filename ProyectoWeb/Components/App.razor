@@ -14,8 +14,112 @@
 </head>
 
 <body>
+    @* <script>
+        window.GenerarPDF = async function (datos) {
+            const pdf = new jsPDF();
+
+            pdf.setFontSize(14);
+            pdf.text(20, 20, "Reporte de Cooperación");
+
+            pdf.setFontSize(12);
+            pdf.text(20, 40, `Ciudadano: ${datos.Ciudadano}`);
+            pdf.text(20, 50, `Cooperación: ${datos.Cooperacion}`);
+            pdf.text(20, 60, `Fecha de Pago: ${datos.FechaPago}`);
+            pdf.text(20, 70, `Usuario Receptor: ${datos.Receptor}`);
+            pdf.text(20, 80, `Tipo de Pago: ${datos.EsParcial}`);
+
+            // Notas con salto de línea automático
+            const splitNotas = pdf.splitTextToSize(`Notas: ${datos.Notas}`, 170);
+            pdf.text(splitNotas, 20, 100);
+
+            pdf.save('cooperacion.pdf');
+        };
+    </script> *@
+
+    <script>
+        window.GenerarPDF = async function (datos) {
+            const pdf = new jsPDF();
+
+            // Configuración inicial
+            const marginLeft = 20;
+            let yPosition = 20;
+
+            // Encabezado
+            pdf.setFontSize(16);
+            pdf.setFont("helvetica", "bold");
+            pdf.text("Delegación Comunitaria 'Unidad y Progreso'", marginLeft, yPosition);
+            yPosition += 10;
+
+            pdf.setFontSize(12);
+            const fechaActual = new Date().toLocaleDateString();
+            pdf.text(`Fecha de emisión: ${fechaActual}`, marginLeft, yPosition);
+            yPosition += 15;
+
+            // Línea separadora
+            pdf.line(20, 35, 190, 35);
+
+            // Título
+            pdf.setFontSize(14);
+            pdf.setFont("helvetica", "bold");
+            pdf.text("Comprobante de Cooperación", marginLeft, yPosition);
+            yPosition += 15;
+
+            // Datos del ciudadano
+            pdf.setFontSize(12);
+            pdf.setFont("helvetica", "normal");
+
+            let y = 60;
+            pdf.text(`Nombre del Ciudadano:`, 20, y);
+            pdf.text(`${datos.Ciudadano}`, 80, y);
+            y += 10;
+
+            pdf.text(`Cooperación:`, 20, y);
+            pdf.text(`${datos.Cooperacion}`, 80, y);
+            y += 10;
+
+            pdf.text(`Fecha de Pago:`, 20, y);
+            pdf.text(`${datos.FechaPago}`, 80, y);
+            y += 10;
+
+            pdf.text(`Usuario Receptor:`, 20, y);
+            pdf.text(`${datos.Receptor}`, 80, y);
+            y += 10;
+
+            pdf.text(`Tipo de Pago:`, 20, y);
+            pdf.text(`${datos.EsParcial}`, 80, y);
+            y += 10;
+
+            // Notas
+            pdf.setFont("helvetica", "bold");
+            pdf.text("Notas:", 20, y);
+            y += 8;
+
+            pdf.setFont("helvetica", "normal");
+            const splitNotas = pdf.splitTextToSize(datos.Notas, 160);
+            pdf.text(splitNotas, 20, y);
+            y += splitNotas.length * 7 + 10;
+
+            // Línea del sello
+            pdf.line(20, y + 20, 70, y + 20);
+            pdf.text("Sello de validación", 25, y + 27);
+
+            // Línea de firma
+            pdf.line(140, y + 20, 190, y + 20);
+            pdf.text("Firma del Delegado", 145, y + 27);
+
+            // Footer
+            pdf.setFontSize(10);
+            pdf.setFont("helvetica", "italic");
+            pdf.text("Gracias por contribuir al bienestar de nuestra comunidad.", 105, 280, { align: "center" });
+
+            // Guardar
+            pdf.save(`Comprobante_Cooperacion_${datos.Ciudadano.replace(/\s+/g, '_')}.pdf`);
+        };
+    </script>
+
     <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.0.272/jspdf.debug.js"></script>
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"></script>
 </body>
 

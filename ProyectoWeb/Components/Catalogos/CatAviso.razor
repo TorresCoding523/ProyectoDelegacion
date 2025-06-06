@@ -1,98 +1,332 @@
 ﻿@page "/catalogos/Aviso"
 
-<h3>Catálogo Aviso</h3>
+<h3>Catálogo de Avisos - Sistema de Gestión</h3>
+<br />
 
-<br />
-<RadzenButton Text="Agregar" Icon="add" ButtonStyle="ButtonStyle.Success" Click="(()=>Editar(new Aviso()))" />
-<br />
-<br />
-<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="30" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-Data="@avisos" TItem="Aviso">
-    <Columns>
-        <RadzenDataGridColumn Property="IdAviso" Title="ID" Width="50" />
-        <RadzenDataGridColumn Property="Titulo" Title="Titulo" Width="50" />
-        <RadzenDataGridColumn Property="Texto" Title="Texto" Width="50" />
-        <RadzenDataGridColumn Property="Fecha" Title="Fecha" Width="50" />
-        <RadzenDataGridColumn Property="IdCuidadanoResponsable" Title="CuidadanoResponsable" Width="50" />
-        <RadzenDataGridColumn Title="Acciones">
-            <Template Context="data">
-                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning" Icon="edit" />
-                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger" Icon="delete" />
-            </Template>
-        </RadzenDataGridColumn>
-    </Columns>
-</RadzenDataGrid>
+<!-- Encabezado con estadísticas -->
+<RadzenRow Gap="1rem" class="rz-mb-4">
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="campaign" Style="font-size: 2rem; color: var(--rz-primary);" />
+                <RadzenText TextStyle="TextStyle.H6">Total Avisos</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-primary">
+                    @(avisos?.Count ?? 0)
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="today" Style="font-size: 2rem; color: var(--rz-success);" />
+                <RadzenText TextStyle="TextStyle.H6">Avisos Recientes</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-success">
+                    @avisosRecientes
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="person" Style="font-size: 2rem; color: var(--rz-info);" />
+                <RadzenText TextStyle="TextStyle.H6">Con Responsable</RadzenText>
+                <RadzenText TextStyle="TextStyle.H4" class="rz-color-info">
+                    @avisosConResponsable
+                </RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+
+<!-- Controles de acción -->
+<RadzenCard class="rz-mb-3">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenText TextStyle="TextStyle.H6">
+            <RadzenIcon Icon="campaign" /> Gestión de Avisos
+        </RadzenText>
+        <RadzenButton Text="Agregar Aviso" Icon="add" ButtonStyle="ButtonStyle.Success"
+                      Click="(()=>Editar(new Aviso()))" />
+    </RadzenStack>
+</RadzenCard>
+
+<!-- Tabla de avisos -->
+<RadzenCard>
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-3">
+        <RadzenIcon Icon="list" /> Lista de Avisos
+    </RadzenText>
+
+    @if (avisos != null && avisos.Any())
+    {
+        <div style="overflow-x: auto; overflow-y: visible;">
+            <RadzenDataGrid @ref="grid" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true"
+                            FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                            Data="@avisos" TItem="Aviso" Style="border: none;">
+                <Columns>
+                    <RadzenDataGridColumn Property="IdAviso" Title="ID" Width="80px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@data.IdAviso.ToString()" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="Titulo" Title="Título" Width="200px">
+                        <Template Context="data">
+                            <RadzenStack Gap="0.25rem">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" Style="color: var(--rz-primary);">
+                                    <RadzenIcon Icon="campaign" Style="font-size: 1rem;" />
+                                    @data.Titulo
+                                </RadzenText>
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="Texto" Title="Contenido" Width="250px">
+                        <Template Context="data">
+                            @if (!string.IsNullOrEmpty(data.Texto))
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    @(data.Texto.Length > 80 ? data.Texto.Substring(0, 80) + "..." : data.Texto)
+                                </RadzenText>
+                            }
+                            else
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    <em>Sin contenido</em>
+                                </RadzenText>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="Fecha" Title="Fecha" Width="120px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenStack Gap="0.25rem" AlignItems="AlignItems.Center">
+                                <RadzenText TextStyle="TextStyle.Body2">
+                                    <RadzenIcon Icon="calendar_today" Style="font-size: 0.9rem;" />
+                                    @data.Fecha.ToString("dd/MM/yyyy")
+                                </RadzenText>
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="IdCuidadanoResponsable" Title="Responsable" Width="150px">
+                        <Template Context="data">
+                            @if (!string.IsNullOrEmpty(data.IdCuidadanoResponsable))
+                            {
+                                var responsable = ciudadanos?.FirstOrDefault(c => c.IdCiudadano == data.IdCuidadanoResponsable);
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    <RadzenIcon Icon="person" Style="font-size: 0.9rem;" />
+                                    @(responsable?.Nombre ?? "Sin asignar")
+                                </RadzenText>
+                            }
+                            else
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
+                                    <em>Sin responsable</em>
+                                </RadzenText>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center">
+                        <Template Context="data">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
+                                <RadzenButton Click="(()=>VerDetalle(data))" ButtonStyle="ButtonStyle.Info"
+                                              Icon="visibility" Size="ButtonSize.Small" />
+                                <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning"
+                                              Icon="edit" Size="ButtonSize.Small"
+                                              Tooltip="Editar aviso" />
+                                <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger"
+                                              Icon="delete" Size="ButtonSize.Small"
+                                              Tooltip="Eliminar aviso" />
+                            </RadzenStack>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    }
+    else if (avisos == null)
+    {
+        <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        <RadzenText TextStyle="TextStyle.Body2" class="rz-mt-2">Cargando avisos...</RadzenText>
+    }
+    else
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Info" Icon="info" Title="Sin avisos registrados">
+            No hay avisos registrados en el sistema.
+            <RadzenButton Text="Agregar Primer Aviso" Icon="add" ButtonStyle="ButtonStyle.Success"
+                          Click="(()=>Editar(new Aviso()))"
+                          Size="ButtonSize.Small" class="rz-mt-2" />
+        </RadzenAlert>
+    }
+</RadzenCard>
 
 @code {
+    RadzenDataGrid<Aviso> grid;
     AvisoManager avisoManager;
     List<Aviso> avisos;
 
     CiudadanoManager ciudadanoManager;
     List<Ciudadano> ciudadanos;
 
-    protected override void OnInitialized()
+    // Variables para estadísticas
+    int avisosRecientes = 0;
+    int avisosConResponsable = 0;
+
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        await base.OnInitializedAsync();
         avisoManager = FabricManager.AvisoManager;
         ciudadanoManager = FabricManager.CiudadanoManager;
-        ciudadanos = ciudadanoManager.ObtenerTodos().Result;
-        ActualizarTabla();
+        await CargarDatos();
     }
 
-    void ActualizarTabla()
+    async Task CargarDatos()
     {
-        avisos = avisoManager.ObtenerTodos().Result ?? new List<Aviso>();
-        InvokeAsync(StateHasChanged);
+        try
+        {
+            ciudadanos = await ciudadanoManager.ObtenerTodos() ?? new List<Ciudadano>();
+            await ActualizarTabla();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar datos: {ex.Message}");
+        }
+    }
+
+    async Task ActualizarTabla()
+    {
+        try
+        {
+            avisos = await avisoManager.ObtenerTodos() ?? new List<Aviso>();
+            CalcularEstadisticas();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar avisos: {ex.Message}");
+        }
+    }
+
+    void CalcularEstadisticas()
+    {
+        if (avisos != null)
+        {
+            // Avisos de los últimos 30 días
+            var fechaLimite = DateTime.Now.AddDays(-30);
+            avisosRecientes = avisos.Count(a => a.Fecha >= fechaLimite);
+
+            // Avisos con responsable asignado
+            avisosConResponsable = avisos.Count(a => !string.IsNullOrEmpty(a.IdCuidadanoResponsable));
+        }
     }
 
     async Task Editar(Aviso aviso)
     {
         string titulo = aviso.IdAviso == 0 ? "Nuevo Aviso" : $"Editar {aviso.Titulo}";
         var result = await dialogService.OpenAsync(titulo, ds =>
-
     @<RadzenStack Gap="1.5rem">
         <div class="row">
-            <div class="col-md-6">
-                <label>Título</label>
-                <RadzenTextBox @bind-Value="aviso.Titulo" class="w-100" />
-            </div>
-            <div class="col-md-6">
-                <label>Fecha</label>
-                <RadzenDatePicker @bind-Value="aviso.Fecha" class="w-100" />
-            </div>
+            <div class="col-4">Título</div>
+            <div class="col-8"><RadzenTextBox @bind-Value="aviso.Titulo" class="w-100" Placeholder="Ingrese el título del aviso" /></div>
         </div>
-
         <div class="row">
-            <div class="col-md-6">
-                <label>Ciudadano Responsable</label>
-                <RadzenDropDown @bind-Value="aviso.IdCuidadanoResponsable" Data="ciudadanos" TValue="string" ValueProperty="IdCiudadano" TextProperty="Nombre" class="w-100" />
-            </div>
-            <div class="col-md-6">
-                <label>Texto</label>
-                <RadzenTextArea @bind-Value="aviso.Texto" class="w-100" />
+            <div class="col-4">Fecha</div>
+            <div class="col-8"><RadzenDatePicker @bind-Value="aviso.Fecha" class="w-100" Placeholder="Seleccione la fecha" AllowClear="true" ShowTime="false" DateFormat="dd/MM/yyyy" /></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Responsable</div>
+            <div class="col-8">
+                <RadzenDropDown @bind-Value="aviso.IdCuidadanoResponsable" Data="ciudadanos"
+                                TValue="string" ValueProperty="IdCiudadano"
+                                class="w-100" Placeholder="Seleccione un responsable (opcional)" AllowClear="true" >
+                    <Template Context="ciudadano">
+                        @($"{ciudadano.Nombre} {ciudadano.Apellidos}")
+                    </Template>
+                </RadzenDropDown>
             </div>
         </div>
-
-        <div class="row mt-3">
-            <div class="col-12 text-end">
-                <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary" Click="(() => Guardar(aviso))" Style="margin-right: 10px;" />
-                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary" Click="(() => dialogService.Close(false))" />
+        <div class="row">
+            <div class="col-4">Contenido</div>
+            <div class="col-8"><RadzenTextArea @bind-Value="aviso.Texto" class="w-100" Placeholder="Contenido del aviso" Rows="3" /></div>
+        </div>
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="col-3">
+                <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary"
+                              Click="(() => Guardar(aviso, ds))" class="w-100" />
+            </div>
+            <div class="col-3">
+                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary"
+                              Click="(() => ds.Close(false))" class="w-100" />
             </div>
         </div>
-    </RadzenStack>
+    </RadzenStack>,
+        new DialogOptions()
+        {
+            Draggable = true,
+            ShowClose = true,
+            Resizable = true,
+            Width = "600px",
+            Height = "450px"
+        });
 
-    , new DialogOptions()
-    {
-        Draggable = true,
-        ShowClose = true,
-        Resizable = true,
-        Width = "600px",
-        Height = "350px"
-    });
+        if (result == true)
+        {
+            await ActualizarTabla();
+        }
     }
 
-    async Task Guardar(Aviso aviso)
+    async Task VerDetalle(Aviso aviso)
     {
+        await dialogService.OpenAsync($"Detalle - {aviso.Titulo}", ds =>
+    @<RadzenStack Gap="1rem">
+        <RadzenFieldset Text="Información del Aviso">
+            <RadzenRow Gap="1rem">
+                <!-- Columna Izquierda: Info básica -->
+                <RadzenColumn Size="4">
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenText><strong>Título:</strong></RadzenText>
+                        <RadzenText Style="margin-bottom: 1rem;">@aviso.Titulo</RadzenText>
+
+                        <RadzenText><strong>Fecha:</strong></RadzenText>
+                        <RadzenText Style="margin-bottom: 1rem;">@aviso.Fecha.ToString("dd/MM/yyyy")</RadzenText>
+
+                        <RadzenText><strong>Responsable:</strong></RadzenText>
+                        <RadzenText>
+                            @($"{ciudadanos.FirstOrDefault(c => c.IdCiudadano == aviso.IdCuidadanoResponsable)?.Nombre} {ciudadanos.FirstOrDefault(c => c.IdCiudadano == aviso.IdCuidadanoResponsable)?.Apellidos}")
+                        </RadzenText>
+                    </RadzenStack>
+                </RadzenColumn>
+
+                <!-- Columna Derecha: Contenido del texto -->
+                <RadzenColumn Size="8">
+                    <RadzenText><strong>Contenido:</strong></RadzenText>
+                    <RadzenCard Style="margin-top: 0.5rem; padding: 1rem; background-color: #f8f9fa; height: 200px; overflow-y: auto;">
+                        <RadzenText Style="white-space: pre-wrap; line-height: 1.5;">@aviso.Texto</RadzenText>
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenFieldset>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Cerrar" ButtonStyle="ButtonStyle.Secondary" Click="(() => ds.Close())" />
+        </RadzenStack>
+    </RadzenStack>,
+        new DialogOptions()
+        {
+            Width = "800px",
+            Height = "480px",
+            Resizable = true,
+            Draggable = true
+        });
+    }
+
+    async Task Guardar(Aviso aviso, DialogService ds)
+    {
+        if (string.IsNullOrWhiteSpace(aviso.Titulo))
+        {
+            await dialogService.Alert("El título del aviso es obligatorio", "Validación");
+            return;
+        }
+
         Aviso resultado;
         if (aviso.IdAviso == 0)
         {
@@ -105,8 +339,8 @@ Data="@avisos" TItem="Aviso">
 
         if (resultado != null)
         {
-            dialogService.Close(true);
-            ActualizarTabla();
+            ds.Close(true);
+            await ActualizarTabla();
         }
         else
         {
@@ -116,15 +350,38 @@ Data="@avisos" TItem="Aviso">
 
     async Task Eliminar(Aviso aviso)
     {
-        var r = await dialogService.Confirm($"¿Realmente deseas eliminar el aviso '{aviso.Titulo}'?", "Advertencia",
-            new ConfirmOptions() { OkButtonText = "Sí", CancelButtonText = "No" });
+        var result = await dialogService.OpenAsync($"Confirmar eliminación", ds =>
+    @<RadzenStack Gap="1rem">
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Icon="warning" Title="¿Está seguro?">
+            Se eliminará permanentemente el aviso <strong>@aviso.Titulo</strong>.
+            <br />Esta acción no se puede deshacer.
+        </RadzenAlert>
 
-        if (r.Value)
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary"
+                          Click="(() => ds.Close(false))" />
+            <RadzenButton Text="Sí, eliminar" ButtonStyle="ButtonStyle.Danger"
+                          Click="(() => ds.Close(true))" />
+        </RadzenStack>
+    </RadzenStack>,
+        new DialogOptions()
+        {
+            Width = "500px",
+            Height = "300px",
+            Resizable = true,
+            Draggable = true
+        });
+
+        if (result == true)
         {
             var eliminado = await avisoManager.Eliminar(aviso.IdAviso.ToString());
             if (eliminado)
             {
-                ActualizarTabla();
+                await ActualizarTabla();
+            }
+            else
+            {
+                await dialogService.Alert(avisoManager.Error ?? "Error desconocido", "Error al eliminar");
             }
         }
     }
