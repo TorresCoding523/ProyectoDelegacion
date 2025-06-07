@@ -70,7 +70,7 @@
 
     @if (cooperacionesDeCiudadanos != null && cooperacionesDeCiudadanos.Any())
     {
-        <div style="overflow-x: auto; overflow-y: visible;">
+        <div class="main-container" style="overflow-x: auto; overflow-y: visible;">
             <RadzenDataGrid @ref="grid" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true"
                             FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true"
                             PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"

@@ -101,7 +101,7 @@
                             <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Activo" />
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center">
+                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
                         <Template Context="data">
                             <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
                                 <RadzenButton Click="(()=>VerDetalle(data))" ButtonStyle="ButtonStyle.Info"

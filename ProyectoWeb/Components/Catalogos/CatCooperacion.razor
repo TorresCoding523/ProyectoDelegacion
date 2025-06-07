@@ -1,5 +1,16 @@
 ﻿@page "/catalogos/Cooperacion"
 
+<style>
+    .main-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: #f9fafb;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+</style>
+
 <h3>Catálogo de Cooperaciones - Sistema de Gestión</h3>
 <br />
 
@@ -70,13 +81,13 @@
 
     @if (cooperacions != null && cooperacions.Any())
     {
-        <div style="overflow-x: auto; overflow-y: visible;">
+        <div class="main-container" style="overflow-x: auto; overflow-y: visible;">
             <RadzenDataGrid @ref="grid" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true"
                             FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true"
                             PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                             Data="@cooperacions" TItem="Cooperacion" Style="border: none;">
                 <Columns>
-                    <RadzenDataGridColumn Property="IdCooperacion" Title="ID" Width="80px" TextAlign="TextAlign.Center">
+                    <RadzenDataGridColumn Property="IdCooperacion" Title="ID" Width="95px" TextAlign="TextAlign.Center">
                         <Template Context="data">
                             <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@data.IdCooperacion.ToString()" />
                         </Template>
@@ -96,7 +107,7 @@
                             @if (!string.IsNullOrEmpty(data.Descripcion))
                             {
                                 <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
-                                    @(data.Descripcion.Length > 100 ? data.Descripcion.Substring(0, 100) + "..." : data.Descripcion)
+                                    @(data.Descripcion.Length > 30 ? data.Descripcion.Substring(0, 30) + "..." : data.Descripcion)
                                 </RadzenText>
                             }
                             else
@@ -112,27 +123,27 @@
                             <RadzenBadge BadgeStyle="BadgeStyle.Warning" Text="@data.Monto.ToString("C")" />
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="FechaDeInicio" Title="Fecha Inicio" Width="130px" TextAlign="TextAlign.Center">
+                    <RadzenDataGridColumn Property="FechaDeInicio" Title="Fecha Inicio" Width="200px" TextAlign="TextAlign.Center">
                         <Template Context="data">
                             <RadzenText TextStyle="TextStyle.Body2">
                                 @data.FechaDeInicio.ToString("dd/MM/yyyy")
                             </RadzenText>
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="FechaLimiteDePago" Title="Fecha Límite" Width="130px" TextAlign="TextAlign.Center">
+                    <RadzenDataGridColumn Property="FechaLimiteDePago" Title="Fecha Límite" Width="200px" TextAlign="TextAlign.Center">
                         <Template Context="data">
                             <RadzenText TextStyle="TextStyle.Body2" class="@(data.FechaLimiteDePago < DateTime.Now ? "rz-color-danger" : "rz-text-color")">
                                 @data.FechaLimiteDePago.ToString("dd/MM/yyyy")
                             </RadzenText>
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Title="Estado" Width="100px" TextAlign="TextAlign.Center">
+                    <RadzenDataGridColumn Title="Estado" Width="200px" TextAlign="TextAlign.Center">
                         <Template Context="data">
                             <RadzenBadge BadgeStyle="@(data.FechaLimiteDePago < DateTime.Now ? BadgeStyle.Danger : BadgeStyle.Success)"
                                          Text="@(data.FechaLimiteDePago < DateTime.Now ? "Vencida" : "Vigente")" />
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center">
+                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
                         <Template Context="data">
                             <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
                                 <RadzenButton Click="(()=>VerDetalle(data))" ButtonStyle="ButtonStyle.Info"

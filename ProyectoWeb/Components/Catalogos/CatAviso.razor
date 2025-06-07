@@ -85,7 +85,7 @@
                             @if (!string.IsNullOrEmpty(data.Texto))
                             {
                                 <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
-                                    @(data.Texto.Length > 80 ? data.Texto.Substring(0, 80) + "..." : data.Texto)
+                                    @(data.Texto.Length > 40 ? data.Texto.Substring(0, 40) + "..." : data.Texto)
                                 </RadzenText>
                             }
                             else
@@ -113,7 +113,7 @@
                                 var responsable = ciudadanos?.FirstOrDefault(c => c.IdCiudadano == data.IdCuidadanoResponsable);
                                 <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
                                     <RadzenIcon Icon="person" Style="font-size: 0.9rem;" />
-                                    @(responsable?.Nombre ?? "Sin asignar")
+                                    @(responsable != null ? $"{responsable.Nombre} {responsable.Apellidos}" : "Sin asignar")
                                 </RadzenText>
                             }
                             else
@@ -124,7 +124,7 @@
                             }
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center">
+                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
                         <Template Context="data">
                             <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
                                 <RadzenButton Click="(()=>VerDetalle(data))" ButtonStyle="ButtonStyle.Info"

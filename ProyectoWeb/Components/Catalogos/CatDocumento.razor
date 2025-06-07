@@ -1,5 +1,16 @@
 ﻿@page "/catalogos/Documento"
 
+<style>
+    .main-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: #f9fafb;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+</style>
+
 <h3>Catálogo de Documentos - Sistema de Gestión</h3>
 <br />
 
@@ -70,18 +81,18 @@
 
     @if (documentos != null && documentos.Any())
     {
-        <div style="overflow-x: auto; overflow-y: visible;">
+        <div class="main-container" style="overflow-x: auto; overflow-y: visible;">
             <RadzenDataGrid @ref="grid" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true"
                             FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true"
                             PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                             Data="@documentos" TItem="Documento" Style="border: none;">
                 <Columns>
-                    <RadzenDataGridColumn Property="IdDocumento" Title="ID" Width="80px" TextAlign="TextAlign.Center">
+                    <RadzenDataGridColumn Property="IdDocumento" Title="ID" Width="100px" TextAlign="TextAlign.Center">
                         <Template Context="data">
                             <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@data.IdDocumento.ToString()" />
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="Nombre" Title="Nombre del Documento" Width="200px">
+                    <RadzenDataGridColumn Property="Nombre" Title="Nombre del Documento" Width="230px">
                         <Template Context="data">
                             <RadzenStack Gap="0.25rem">
                                 <RadzenText TextStyle="TextStyle.Subtitle2" Style="color: var(--rz-primary);">
@@ -115,12 +126,12 @@
                             }
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="Notas" Title="Notas" Width="250px">
+                    <RadzenDataGridColumn Property="Notas" Title="Notas" Width="230px">
                         <Template Context="data">
                             @if (!string.IsNullOrEmpty(data.Notas))
                             {
                                 <RadzenText TextStyle="TextStyle.Body2" class="rz-color-secondary">
-                                    @(data.Notas.Length > 100 ? data.Notas.Substring(0, 100) + "..." : data.Notas)
+                                    @(data.Notas.Length > 25 ? data.Notas.Substring(0, 25) + "..." : data.Notas)
                                 </RadzenText>
                             }
                             else
@@ -131,12 +142,12 @@
                             }
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Title="Estado" Width="100px" TextAlign="TextAlign.Center">
+                    <RadzenDataGridColumn Title="Estado" Width="120px" TextAlign="TextAlign.Center">
                         <Template Context="data">
                             <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Activo" />
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center">
+                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
                         <Template Context="data">
                             <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
                                 <RadzenButton Click="(()=>VerDetalle(data))" ButtonStyle="ButtonStyle.Info"

@@ -155,9 +155,9 @@
                             </RadzenStack>
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center">
+                    <RadzenDataGridColumn Title="Acciones" Width="120px" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
                         <Template Context="data">
-                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
                                 <RadzenButton Click="(()=>VerDetalle(data))" ButtonStyle="ButtonStyle.Info"
                                               Icon="visibility" Size="ButtonSize.Small" />
                                 <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning"
