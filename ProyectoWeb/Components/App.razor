@@ -77,6 +77,10 @@
             pdf.text(`${datos.Cooperacion}`, 80, y);
             y += 10;
 
+            pdf.text(`Monto:`, 20, y);
+            pdf.text(`$${datos.MontoPagado || '0.00'}`, 80, y);  // ← Ya funciona con el $
+            y += 10;
+
             pdf.text(`Fecha de Pago:`, 20, y);
             pdf.text(`${datos.FechaPago}`, 80, y);
             y += 10;

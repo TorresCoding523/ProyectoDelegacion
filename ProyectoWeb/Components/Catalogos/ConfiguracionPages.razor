@@ -1,13 +1,13 @@
-﻿@page "/catalogos/CoperacionesDeCiudadano"
-
+﻿@* @page "/catalogos/CoperacionesDeCiudadano"
+ *@
 <style>
     .main-container {
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-        background-color: #f9fafb;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #f9fafb;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     }
 </style>
 
@@ -69,7 +69,7 @@
             <RadzenIcon Icon="people" /> Gestión de Cooperaciones de Ciudadano
         </RadzenText>
         <RadzenButton Text="Agregar Cooperación" Icon="add" ButtonStyle="ButtonStyle.Success"
-                      Click="(()=>Editar(new CooperacionesDeCiudadano()))" />
+        Click="(()=>Editar(new CooperacionesDeCiudadano()))" />
     </RadzenStack>
 </RadzenCard>
 
@@ -78,10 +78,10 @@
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
         <RadzenIcon Icon="search" Style="font-size: 1.5rem; color: var(--rz-primary);" />
         <RadzenTextBox @bind-Value="textoBusqueda" @oninput="OnBusquedaChanged"
-                       Placeholder="Buscar por ciudadano y cooperación..."
-                       Style="flex: 1;" />
+        Placeholder="Buscar por ciudadano y cooperación..."
+        Style="flex: 1;" />
         <RadzenButton Text="Limpiar" Icon="clear" ButtonStyle="ButtonStyle.Light"
-                      Click="LimpiarBusqueda" Size="ButtonSize.Small" />
+        Click="LimpiarBusqueda" Size="ButtonSize.Small" />
     </RadzenStack>
     @if (!string.IsNullOrEmpty(textoBusqueda))
     {
@@ -102,9 +102,9 @@
     {
         <div class="main-container" style="overflow-x: auto; overflow-y: visible;">
             <RadzenDataGrid @ref="grid" AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="true"
-                            FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true"
-                            PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                            Data="@cooperacionesDeCiudadanos" TItem="CooperacionesDeCiudadano" Style="border: none;">
+            FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true"
+            PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+            Data="@cooperacionesDeCiudadanos" TItem="CooperacionesDeCiudadano" Style="border: none;">
                 <Columns>
                     <RadzenDataGridColumn Property="Id" Title="ID" Width="95px" TextAlign="TextAlign.Center">
                         <Template Context="data">
@@ -141,7 +141,7 @@
                     <RadzenDataGridColumn Property="EsParcial" Title="Tipo Pago" Width="200px" TextAlign="TextAlign.Center">
                         <Template Context="data">
                             <RadzenBadge BadgeStyle="@(data.EsParcial ? BadgeStyle.Warning : BadgeStyle.Success)"
-                                         Text="@(data.EsParcial ? "Parcial" : "Completo")" />
+                            Text="@(data.EsParcial ? "Parcial" : "Completo")" />
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Property="idUsuarioReceptor" Title="Usuario Receptor" Width="250px">
@@ -181,13 +181,13 @@
                         <Template Context="data">
                             <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
                                 <RadzenButton Click="(()=>VerDetalle(data))" ButtonStyle="ButtonStyle.Info"
-                                              Icon="visibility" Size="ButtonSize.Small" />
+                                Icon="visibility" Size="ButtonSize.Small" />
                                 <RadzenButton Click="(()=>Editar(data))" ButtonStyle="ButtonStyle.Warning"
-                                              Icon="edit" Size="ButtonSize.Small"
-                                              Tooltip="Editar cooperación de ciudadano" />
+                                Icon="edit" Size="ButtonSize.Small"
+                                Tooltip="Editar cooperación de ciudadano" />
                                 <RadzenButton Click="(()=>Eliminar(data))" ButtonStyle="ButtonStyle.Danger"
-                                              Icon="delete" Size="ButtonSize.Small"
-                                              Tooltip="Eliminar cooperación de ciudadano" />
+                                Icon="delete" Size="ButtonSize.Small"
+                                Tooltip="Eliminar cooperación de ciudadano" />
                             </RadzenStack>
                         </Template>
                     </RadzenDataGridColumn>
@@ -205,7 +205,7 @@
         <RadzenAlert AlertStyle="AlertStyle.Warning" Icon="search" Title="Sin resultados de búsqueda">
             No se encontraron registros que coincidan con "<strong>@textoBusqueda</strong>".
             <RadzenButton Text="Limpiar búsqueda" ButtonStyle="ButtonStyle.Light"
-                          Click="LimpiarBusqueda" Size="ButtonSize.Small" class="rz-mt-2" />
+            Click="LimpiarBusqueda" Size="ButtonSize.Small" class="rz-mt-2" />
         </RadzenAlert>
     }
     else
@@ -213,8 +213,8 @@
         <RadzenAlert AlertStyle="AlertStyle.Info" Icon="info" Title="Sin cooperaciones registradas">
             No hay cooperaciones de ciudadano registradas en el sistema.
             <RadzenButton Text="Agregar Primera Cooperación" Icon="add" ButtonStyle="ButtonStyle.Success"
-                          Click="(()=>Editar(new CooperacionesDeCiudadano()))"
-                          Size="ButtonSize.Small" class="rz-mt-2" />
+            Click="(()=>Editar(new CooperacionesDeCiudadano()))"
+            Size="ButtonSize.Small" class="rz-mt-2" />
         </RadzenAlert>
     }
 </RadzenCard>
@@ -238,6 +238,8 @@
 
     // Variable para búsqueda
     string textoBusqueda = "";
+
+    decimal costo;
 
     protected override async Task OnInitializedAsync()
     {
@@ -285,7 +287,7 @@
 
         // Convertir a minúsculas
         texto = texto.ToLower().Trim();
-        
+
         // Remover acentos
         var textoNormalizado = texto
             .Replace("á", "a").Replace("à", "a").Replace("ä", "a").Replace("â", "a")
@@ -324,28 +326,28 @@
         if (!string.IsNullOrEmpty(textoBusqueda))
         {
             var busquedaNormalizada = NormalizarTexto(textoBusqueda);
-            
+
             cooperacionesDeCiudadanosFiltradas = cooperacionesDeCiudadanos.Where(c =>
             {
                 // Buscar en el nombre completo del ciudadano
                 var nombreCompleto = ObtenerNombreCompletoCiudadano(c.IdCiudadano);
                 var nombreNormalizado = NormalizarTexto(nombreCompleto);
-                
+
                 // Buscar en el nombre de la cooperación
                 var nombreCooperacion = ObtenerNombreCooperacion(c.IdCooperacion);
                 var cooperacionNormalizada = NormalizarTexto(nombreCooperacion);
-                
+
                 // También buscar por partes del nombre (nombre o apellido por separado)
                 var ciudadano = ciudadanos?.FirstOrDefault(ci => ci.IdCiudadano == c.IdCiudadano);
                 bool coincideNombre = false;
                 bool coincideApellido = false;
-                
+
                 if (ciudadano != null)
                 {
                     coincideNombre = NormalizarTexto(ciudadano.Nombre ?? "").Contains(busquedaNormalizada);
                     coincideApellido = NormalizarTexto(ciudadano.Apellidos ?? "").Contains(busquedaNormalizada);
                 }
-                
+
                 return nombreNormalizado.Contains(busquedaNormalizada) ||
                        cooperacionNormalizada.Contains(busquedaNormalizada) ||
                        coincideNombre ||
@@ -397,52 +399,77 @@
         string titulo = cooperacionesDeCiudadano.Id == 0 ? "Nueva Cooperación de Ciudadano" : $"Editar Registro #{cooperacionesDeCiudadano.Id}";
         var result = await dialogService.OpenAsync(titulo, ds =>
     @<RadzenStack Gap="1.5rem">
+        <!-- Fila 1: Información Principal -->
         <div class="row">
-            <div class="col-6">
+            <div class="col-md-6">
                 <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-2">Ciudadano *</RadzenText>
                 <RadzenDropDown @bind-Value="cooperacionesDeCiudadano.IdCiudadano"
                                 Data="ciudadanos" TValue="string"
                                 ValueProperty="IdCiudadano"
                                 Placeholder="Seleccione un ciudadano"
-                                class="w-100" >
+                                class="w-100">
                     <Template Context="ciudadano">
                         @($"{ciudadano.Nombre} {ciudadano.Apellidos}")
                     </Template>
                 </RadzenDropDown>
             </div>
-            <div class="col-6">
+            <div class="col-md-6">
                 <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-2">Cooperación *</RadzenText>
                 <RadzenDropDown @bind-Value="cooperacionesDeCiudadano.IdCooperacion"
                                 Data="cooperacions" TValue="int"
                                 ValueProperty="IdCooperacion" TextProperty="Nombre"
+                                Change="(args=>seleccionAsync(args,cooperacionesDeCiudadano))"
                                 Placeholder="Seleccione una cooperación"
                                 class="w-100" />
             </div>
         </div>
+
+        <!-- Fila 2: Información de Pago -->
         <div class="row">
-            <div class="col-6">
-                <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-2">Fecha de Pago</RadzenText>
-                <RadzenDatePicker @bind-Value="cooperacionesDeCiudadano.FechaDePago" class="w-100" Placeholder="Seleccione la fecha" AllowClear="true" ShowTime="false" DateFormat="dd/MM/yyyy" />
+            <div class="col-md-4">
+                <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-2">Monto a Pagar *</RadzenText>
+                <RadzenNumeric @bind-Value="cooperacionesDeCiudadano.MontoPagado"
+                               TValue="decimal"
+                               class="w-100"
+                               Format="c" />
             </div>
-            <div class="col-6">
+            <div class="col-md-4">
+                <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-2">Fecha de Pago</RadzenText>
+                <RadzenDatePicker @bind-Value="cooperacionesDeCiudadano.FechaDePago"
+                                  class="w-100"
+                                  Placeholder="Seleccione la fecha"
+                                  AllowClear="true"
+                                  ShowTime="false"
+                                  DateFormat="dd/MM/yyyy" />
+            </div>
+            <div class="col-md-4">
+                <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-2">¿Es Parcial?</RadzenText>
+                <div class="d-flex align-items-center" style="height: 40px;">
+                    <RadzenSwitch @bind-Value="cooperacionesDeCiudadano.EsParcial" />
+                    <span class="ms-2">@(cooperacionesDeCiudadano.EsParcial ? "Sí" : "No")</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fila 3: Usuario Receptor -->
+        <div class="row">
+            <div class="col-md-12">
                 <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-2">Usuario Receptor</RadzenText>
                 <RadzenDropDown @bind-Value="cooperacionesDeCiudadano.idUsuarioReceptor"
                                 Data="ciudadanos" TValue="string"
                                 ValueProperty="IdCiudadano"
                                 Placeholder="Seleccione usuario receptor"
-                                class="w-100" >
+                                class="w-100">
                     <Template Context="ciudadano">
                         @($"{ciudadano.Nombre} {ciudadano.Apellidos}")
                     </Template>
                 </RadzenDropDown>
             </div>
         </div>
+
+        <!-- Fila 4: Notas -->
         <div class="row">
-            <div class="col-3">
-                <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-2">¿Es Parcial?</RadzenText>
-                <RadzenSwitch @bind-Value="cooperacionesDeCiudadano.EsParcial" />
-            </div>
-            <div class="col-9">
+            <div class="col-md-12">
                 <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-2">Notas</RadzenText>
                 <RadzenTextArea @bind-Value="cooperacionesDeCiudadano.Notas"
                                 class="w-100"
@@ -450,15 +477,21 @@
                                 Rows="3" />
             </div>
         </div>
+
+        <!-- Fila 5: Botones de Acción -->
         <div class="row">
-            <div class="col-6"></div>
-            <div class="col-3">
-                <RadzenButton Text="Guardar" ButtonStyle="ButtonStyle.Primary"
-                              Click="(() => Guardar(cooperacionesDeCiudadano, ds))" class="w-100" />
+            <div class="col-md-6"></div>
+            <div class="col-md-3">
+                <RadzenButton Text="Cancelar"
+                              ButtonStyle="ButtonStyle.Secondary"
+                              Click="(() => ds.Close(false))"
+                              class="w-100" />
             </div>
-            <div class="col-3">
-                <RadzenButton Text="Cancelar" ButtonStyle="ButtonStyle.Secondary"
-                              Click="(() => ds.Close(false))" class="w-100" />
+            <div class="col-md-3">
+                <RadzenButton Text="Guardar"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Click="(() => Guardar(cooperacionesDeCiudadano, ds))"
+                              class="w-100" />
             </div>
         </div>
     </RadzenStack>,
@@ -474,6 +507,18 @@
         if (result == true)
         {
             await ActualizarTabla();
+        }
+    }
+
+    public async Task seleccionAsync(object value, CooperacionesDeCiudadano cooperacionesDeCiudadano)
+    {
+        if (value is int id)
+        {
+            Cooperacion cooperacion = await FabricManager.CooperacionManager.ObtenerPorId(id.ToString());
+            costo = cooperacion.Monto;
+            cooperacionesDeCiudadano.MontoPagado = costo;
+            dialogService.Close(false);
+            Editar(cooperacionesDeCiudadano);
         }
     }
 
@@ -497,6 +542,12 @@
             <RadzenColumn Size="6">
                 <RadzenFieldset Text="Información de la Cooperación" Style="height: 100%;">
                     <RadzenStack Gap="0.5rem">
+                        <RadzenText>
+                            <strong>Monto Pagado:</strong><br />
+                            <span style="color: #28a745; font-weight: 500;">
+                                $@cooperacionesDeCiudadano.MontoPagado.ToString("N2")
+                            </span>
+                        </RadzenText>
                         <RadzenText><strong>Usuario Receptor:</strong><br />@($"{ciudadanos.FirstOrDefault(s => s.IdCiudadano == cooperacionesDeCiudadano.idUsuarioReceptor)?.Nombre} {ciudadanos.FirstOrDefault(s => s.IdCiudadano == cooperacionesDeCiudadano.idUsuarioReceptor)?.Apellidos}")</RadzenText>
                         <RadzenText>
                             <strong>Es Parcial:</strong><br />
@@ -527,6 +578,7 @@
                     </RadzenCard>
                 </RadzenFieldset>
             </RadzenColumn>
+
         </RadzenRow>
 
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
@@ -539,7 +591,8 @@
 
             <RadzenButton Text="Cerrar" ButtonStyle="ButtonStyle.Secondary" Click="(() => ds.Close())" />
         </RadzenStack>
-    </RadzenStack>,
+    </RadzenStack>
+    ,
         new DialogOptions()
         {
             Width = "900px",
@@ -559,6 +612,7 @@
         var nombreCiudadano = ciudadano != null ? $"{ciudadano.Nombre} {ciudadano.Apellidos}" : "Desconocido";
         var nombreCooperacion = cooperacion?.Nombre ?? "Desconocido";
         var fechaPago = cooperacionesDeCiudadano.FechaDePago.ToString("dd/MM/yyyy");
+        var montoPagado = cooperacionesDeCiudadano.MontoPagado.ToString("F2");
         var nombreReceptor = receptor != null ? $"{receptor.Nombre} {receptor.Apellidos}" : "Desconocido";
         var tipoPago = cooperacionesDeCiudadano.EsParcial ? "Parcial" : "Completo";
         var notas = string.IsNullOrWhiteSpace(cooperacionesDeCiudadano.Notas) ? "Sin notas adicionales registradas" : cooperacionesDeCiudadano.Notas;
@@ -569,6 +623,7 @@
         { "Ciudadano", nombreCiudadano },
         { "Cooperacion", nombreCooperacion },
         { "FechaPago", fechaPago },
+        { "MontoPagado", montoPagado },
         { "Receptor", nombreReceptor },
         { "EsParcial", tipoPago },
         { "Notas", notas }
@@ -576,8 +631,6 @@
 
         await JS.InvokeVoidAsync("GenerarPDF", datosPDF);
     }
-
-
 
     async Task Guardar(CooperacionesDeCiudadano cooperacionesDeCiudadano, DialogService ds)
     {

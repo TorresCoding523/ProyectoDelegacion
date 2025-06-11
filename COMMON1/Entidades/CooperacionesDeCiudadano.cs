@@ -14,7 +14,7 @@ namespace COMMON.Entidades
         public int IdCooperacion { get; set; }
         public DateTime FechaDePago { get; set; }
         public string idUsuarioReceptor { get; set; }
-        //public decimal MontoPagado { get; set; }
+        public decimal MontoPagado { get; set; }
         public bool EsParcial { get; set; }
         public string Notas { get; set; }
     }
